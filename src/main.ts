@@ -18,6 +18,10 @@ export interface ConversionErrorHandler {
   handler: (message: string) => void;
 }
 
+function nodeToCode(node: SceneNode): string {
+  return generateRN(extract(node));
+}
+
 function convertSelection(): void {
   const selection = figma.currentPage.selection;
   if (selection.length === 0) {
@@ -29,13 +33,25 @@ function convertSelection(): void {
   }
 
   // v1: convert the first top-level selected node. Multi-frame handling is a future milestone.
-  const root = selection[0];
-  const ir = extract(root);
-  const code = generateRN(ir);
-  emit<CodeGeneratedHandler>('CODE_GENERATED', code);
+  emit<CodeGeneratedHandler>('CODE_GENERATED', nodeToCode(selection[0]));
 }
 
 export default function main(): void {
+  // Dev Mode code generator: register the generate callback and stay resident.
+  // figma.showUI is not allowed inside the generate callback, so this branch
+  // never opens the run UI.
+  if (figma.mode === 'codegen') {
+    figma.codegen.on('generate', ({ node }): CodegenResult[] => [
+      {
+        title: 'React Native + NativeWind',
+        language: 'TYPESCRIPT',
+        code: nodeToCode(node),
+      },
+    ]);
+    return;
+  }
+
+  // Run plugin (design mode / Dev Mode run): show the preview + copy UI.
   on<ConvertHandler>('CONVERT', convertSelection);
   showUI({ width: 420, height: 600 });
 }

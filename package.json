@@ -49,6 +49,15 @@
     "name": "Figma to NativeWind",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
+    "capabilities": [
+      "codegen"
+    ],
+    "codegenLanguages": [
+      {
+        "label": "React Native + NativeWind",
+        "value": "rn-nativewind"
+      }
+    ],
     "networkAccess": {
       "allowedDomains": [
         "https://api.anthropic.com"

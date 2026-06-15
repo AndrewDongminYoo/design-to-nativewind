@@ -5,6 +5,10 @@
   "name": "Figma to NativeWind",
   "main": "build/main.js",
   "ui": "build/ui.js",
+  "capabilities": ["codegen"],
+  "codegenLanguages": [
+    { "label": "React Native + NativeWind", "value": "rn-nativewind" }
+  ],
   "networkAccess": {
     "allowedDomains": ["https://api.anthropic.com"],
     "reasoning": "Optional LLM-assisted cleanup pass via the Claude API."
