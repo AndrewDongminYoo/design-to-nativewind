@@ -69,15 +69,15 @@ and swapping only `generate-*`.
 
 ## 5. Module Boundaries
 
-| File | Responsibility | Depends on |
-|---|---|---|
-| `src/main.ts` | selection detection, postMessage orchestration | figma |
-| `src/ui.tsx` | code preview, copy, settings UI | preact |
-| `src/core/ir.ts` | IR type definitions | none (pure) |
-| `src/core/extract.ts` | Figma node → IR | figma types |
-| `src/core/map-styles.ts` | IR style → NativeWind classes (scale snap vs arbitrary value) | pure |
-| `src/core/generate-rn.ts` | IR → RN + NativeWind JSX | pure |
-| `src/core/llm.ts` | optional Claude refinement; API key in `figma.clientStorage` | fetch |
+| File                      | Responsibility                                                | Depends on  |
+| ------------------------- | ------------------------------------------------------------- | ----------- |
+| `src/main.ts`             | selection detection, postMessage orchestration                | figma       |
+| `src/ui.tsx`              | code preview, copy, settings UI                               | preact      |
+| `src/core/ir.ts`          | IR type definitions                                           | none (pure) |
+| `src/core/extract.ts`     | Figma node → IR                                               | figma types |
+| `src/core/map-styles.ts`  | IR style → NativeWind classes (scale snap vs arbitrary value) | pure        |
+| `src/core/generate-rn.ts` | IR → RN + NativeWind JSX                                      | pure        |
+| `src/core/llm.ts`         | optional Claude refinement; API key in `figma.clientStorage`  | fetch       |
 
 ## 6. Intermediate Representation (IR)
 
