@@ -6,49 +6,54 @@ import {
   render,
   Text,
   VerticalSpace,
-} from '@create-figma-plugin/ui'
-import { emit, on } from '@create-figma-plugin/utilities'
-import { Fragment, h } from 'preact'
-import { useCallback, useEffect, useState } from 'preact/hooks'
+} from '@create-figma-plugin/ui';
+import { emit, on } from '@create-figma-plugin/utilities';
+import { Fragment, h } from 'preact';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 
 import type {
   CodeGeneratedHandler,
   ConversionErrorHandler,
   ConvertHandler,
-} from './main'
+} from './main';
 
 function Plugin() {
-  const [code, setCode] = useState<string>('')
-  const [error, setError] = useState<string>('')
+  const [code, setCode] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const offCode = on<CodeGeneratedHandler>('CODE_GENERATED', (generated) => {
-      setError('')
-      setCode(generated)
-    })
-    const offError = on<ConversionErrorHandler>('CONVERSION_ERROR', (message) => {
-      setCode('')
-      setError(message)
-    })
+      setError('');
+      setCode(generated);
+    });
+    const offError = on<ConversionErrorHandler>(
+      'CONVERSION_ERROR',
+      (message) => {
+        setCode('');
+        setError(message);
+      },
+    );
     return () => {
-      offCode()
-      offError()
-    }
-  }, [])
+      offCode();
+      offError();
+    };
+  }, []);
 
   const handleConvert = useCallback(() => {
-    emit<ConvertHandler>('CONVERT')
-  }, [])
+    emit<ConvertHandler>('CONVERT');
+  }, []);
 
   const handleCopy = useCallback(() => {
-    if (code) void navigator.clipboard.writeText(code)
-  }, [code])
+    if (code) void navigator.clipboard.writeText(code);
+  }, [code]);
 
   return (
     <Container space="medium">
       <VerticalSpace space="large" />
       <Text>
-        <Muted>Select a frame, then convert it to React Native + NativeWind.</Muted>
+        <Muted>
+          Select a frame, then convert it to React Native + NativeWind.
+        </Muted>
       </Text>
       <VerticalSpace space="medium" />
       <Button fullWidth onClick={handleConvert}>
@@ -81,7 +86,7 @@ function Plugin() {
       ) : null}
       <VerticalSpace space="large" />
     </Container>
-  )
+  );
 }
 
-export default render(Plugin)
+export default render(Plugin);
