@@ -60,10 +60,15 @@ function sizing(node: SceneNode, dimension: 'width' | 'height'): Sizing {
   return { fixed: dimension === 'width' ? node.width : node.height };
 }
 
-function extractStyle(node: SceneNode): IRStyle {
-  // A text node's fill is its glyph color (captured in typography), not a background.
+function extractStyle(node: SceneNode, type: IRNodeType): IRStyle {
+  // Only frames and image-bearing nodes paint a background. A text node's fill
+  // is its glyph color (captured in typography); a vector's fill is its SVG
+  // paint — neither belongs in style.background, and leaking either pollutes
+  // the structural signature that drives sub-component hoisting.
   const background =
-    node.type !== 'TEXT' && 'fills' in node ? firstSolidFill(node.fills) : null;
+    (type === 'frame' || type === 'image') && 'fills' in node
+      ? firstSolidFill(node.fills)
+      : null;
   const cornerRadius =
     'cornerRadius' in node && typeof node.cornerRadius === 'number'
       ? node.cornerRadius
@@ -130,14 +135,19 @@ export function extract(node: SceneNode): IRNode {
     type !== 'vector' && 'children' in node
       ? node.children.map((child) => extract(child))
       : [];
+  const vectorColor =
+    type === 'vector' && 'fills' in node
+      ? (firstSolidFill(node.fills) ?? undefined)
+      : undefined;
   return {
     type,
     name: node.name,
     layout: extractLayout(node),
     width: sizing(node, 'width'),
     height: sizing(node, 'height'),
-    style: extractStyle(node),
+    style: extractStyle(node, type),
     text: extractText(node),
+    vectorColor,
     children,
   };
 }

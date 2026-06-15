@@ -23,33 +23,37 @@ export interface ExtractionResult {
   components: ExtractedComponent[];
 }
 
-function subtreeSize(node: IRNode): number {
-  return 1 + node.children.reduce((sum, child) => sum + subtreeSize(child), 0);
+interface NodeMeta {
+  size: number;
+  key: string;
 }
 
-/** Structural signature; excludes the layer name so siblings merge regardless of naming. */
-function signature(node: IRNode): unknown {
-  return {
+/** Bottom-up: compute size + canonical key once per node, accumulate counts. */
+function analyze(
+  node: IRNode,
+  meta: WeakMap<IRNode, NodeMeta>,
+  counts: Map<string, number>,
+): NodeMeta {
+  const childMetas = node.children.map((child) => analyze(child, meta, counts));
+  const size = 1 + childMetas.reduce((sum, m) => sum + m.size, 0);
+  // Local fields only — child keys are already memoized, so we splice them in
+  // by reference instead of re-stringifying nested signatures at every level.
+  const localSig = JSON.stringify({
     type: node.type,
     layout: node.layout ?? null,
     width: node.width,
     height: node.height,
     style: node.style,
     text: node.text ?? null,
-    children: node.children.map(signature),
-  };
-}
-
-function canonicalKey(node: IRNode): string {
-  return JSON.stringify(signature(node));
-}
-
-function countSubtrees(node: IRNode, counts: Map<string, number>): void {
-  if (subtreeSize(node) >= MIN_SUBTREE_SIZE) {
-    const key = canonicalKey(node);
+    vectorColor: node.vectorColor ?? null,
+  });
+  const key = `${localSig}[${childMetas.map((m) => m.key).join(',')}]`;
+  const m: NodeMeta = { size, key };
+  meta.set(node, m);
+  if (size >= MIN_SUBTREE_SIZE) {
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  node.children.forEach((child) => countSubtrees(child, counts));
+  return m;
 }
 
 class Registry {
@@ -81,30 +85,36 @@ class Registry {
 
 function transform(
   node: IRNode,
+  meta: WeakMap<IRNode, NodeMeta>,
   counts: Map<string, number>,
   registry: Registry,
 ): IRNode {
-  if (subtreeSize(node) >= MIN_SUBTREE_SIZE) {
-    const key = canonicalKey(node);
-    if ((counts.get(key) ?? 0) >= 2) {
-      const name = registry.getOrCreate(key, node);
-      return { ...node, componentName: name, children: [] };
-    }
+  const m = meta.get(node);
+  if (m && m.size >= MIN_SUBTREE_SIZE && (counts.get(m.key) ?? 0) >= 2) {
+    const name = registry.getOrCreate(m.key, node);
+    return { ...node, componentName: name, children: [] };
   }
   return {
     ...node,
-    children: node.children.map((child) => transform(child, counts, registry)),
+    children: node.children.map((child) =>
+      transform(child, meta, counts, registry),
+    ),
   };
 }
 
 export function extractComponents(root: IRNode): ExtractionResult {
+  const meta = new WeakMap<IRNode, NodeMeta>();
   const counts = new Map<string, number>();
-  countSubtrees(root, counts);
+  analyze(root, meta, counts);
 
   const registry = new Registry(toComponentName(root.name || 'Component'));
+  // Skip the root itself (its count is 1 — it cannot hoist into itself) and
+  // recurse via transform on its children.
   const newRoot = {
     ...root,
-    children: root.children.map((child) => transform(child, counts, registry)),
+    children: root.children.map((child) =>
+      transform(child, meta, counts, registry),
+    ),
   };
 
   return { root: newRoot, components: registry.components };

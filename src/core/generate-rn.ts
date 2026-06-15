@@ -49,9 +49,11 @@ function renderNode(
   }
 
   // Vectors are emitted as an empty react-native-svg placeholder for the
-  // developer to fill in; the original paths are not reconstructed.
+  // developer to fill in; the original paths are not reconstructed, but the
+  // primary fill is passed as `color` to hint the intended tint.
   if (node.type === 'vector') {
-    return `${pad}<Svg${sizeProp('width', node.width)}${sizeProp('height', node.height)} />`;
+    const color = node.vectorColor ? ` color="${node.vectorColor}"` : '';
+    return `${pad}<Svg${sizeProp('width', node.width)}${sizeProp('height', node.height)}${color} />`;
   }
 
   const tag = rnTag(node);

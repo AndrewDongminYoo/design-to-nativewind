@@ -28,7 +28,7 @@ function vectorNode() {
   return {
     type: 'VECTOR',
     name: 'Path',
-    fills: [],
+    fills: [{ type: 'SOLID', visible: true, color: { r: 1, g: 0, b: 0 } }],
     opacity: 1,
     width: 12,
     height: 12,
@@ -43,7 +43,10 @@ describe('extract', () => {
     expect(ir.text?.typography.color).toMatch(/^#[0-9a-f]{6}$/);
   });
 
-  it('maps vector node types to the vector IR type', () => {
-    expect(extract(vectorNode()).type).toBe('vector');
+  it('maps vector node types to the vector IR type and captures the fill color', () => {
+    const ir = extract(vectorNode());
+    expect(ir.type).toBe('vector');
+    expect(ir.vectorColor).toBe('#ff0000');
+    expect(ir.style.background).toBeNull();
   });
 });

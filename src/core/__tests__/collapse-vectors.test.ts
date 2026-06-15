@@ -91,4 +91,17 @@ describe('generateRN with vectors', () => {
     expect(code).toContain("import { Svg } from 'react-native-svg'");
     expect(code).toContain('<Svg width={24} height={24} />');
   });
+
+  it('passes a leaf vector fill color through as the Svg color prop', () => {
+    const root = node({
+      name: 'Row',
+      style: { background: '#ffffff', cornerRadius: 0, opacity: 1 },
+      children: [
+        { ...vector('Icon'), vectorColor: '#55555a' },
+        { ...vector('Icon'), vectorColor: '#55555a' },
+      ],
+    });
+    const code = generateRN(root);
+    expect(code).toContain('<Svg width={12} height={12} color="#55555a" />');
+  });
 });
