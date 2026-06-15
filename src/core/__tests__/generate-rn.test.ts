@@ -1,0 +1,87 @@
+import { describe, expect, it } from 'vitest'
+
+import type { IRNode } from '../ir'
+import { generateRN } from '../generate-rn'
+import { mapClasses, snapSpacing, spacingClass } from '../map-styles'
+
+const baseStyle = { background: null, cornerRadius: 0, opacity: 1 } as const
+
+function frame(partial: Partial<IRNode>): IRNode {
+  return {
+    type: 'frame',
+    name: 'Frame',
+    width: 'hug',
+    height: 'hug',
+    style: { ...baseStyle },
+    children: [],
+    ...partial,
+  }
+}
+
+describe('snapSpacing', () => {
+  it('snaps exact scale values', () => {
+    expect(snapSpacing(16)).toBe('4')
+    expect(snapSpacing(0)).toBe('0')
+  })
+
+  it('returns null when no step is within tolerance', () => {
+    expect(snapSpacing(14)).toBeNull()
+  })
+})
+
+describe('spacingClass', () => {
+  it('emits a scale token when snappable', () => {
+    expect(spacingClass('p', 16)).toBe('p-4')
+  })
+
+  it('emits an arbitrary value when not snappable', () => {
+    expect(spacingClass('p', 14)).toBe('p-[14px]')
+  })
+})
+
+describe('mapClasses', () => {
+  it('maps auto layout to flex utilities', () => {
+    const node = frame({
+      layout: {
+        direction: 'row',
+        justify: 'space-between',
+        align: 'center',
+        gap: 8,
+        padding: { top: 16, right: 16, bottom: 16, left: 16 },
+      },
+    })
+    const classes = mapClasses(node)
+    expect(classes).toContain('flex-row')
+    expect(classes).toContain('justify-between')
+    expect(classes).toContain('items-center')
+    expect(classes).toContain('gap-2')
+    expect(classes).toContain('p-4')
+  })
+})
+
+describe('generateRN', () => {
+  it('renders a View with a nested Text node', () => {
+    const node = frame({
+      name: 'Card Header',
+      children: [
+        {
+          type: 'text',
+          name: 'Title',
+          width: 'hug',
+          height: 'hug',
+          style: { ...baseStyle },
+          text: {
+            content: 'Hello',
+            typography: { fontSize: 16, fontWeight: 700, lineHeight: null, color: '#111111' },
+          },
+          children: [],
+        },
+      ],
+    })
+    const code = generateRN(node)
+    expect(code).toContain("import { Text, View } from 'react-native'")
+    expect(code).toContain('export function CardHeader()')
+    expect(code).toContain('<Text')
+    expect(code).toContain('>Hello</Text>')
+  })
+})
