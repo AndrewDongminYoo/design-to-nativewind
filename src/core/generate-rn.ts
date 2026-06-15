@@ -48,10 +48,16 @@ function renderNode(
     return `${pad}<${node.componentName} />`;
   }
 
-  // Vectors are emitted as an empty react-native-svg placeholder for the
-  // developer to fill in; the original paths are not reconstructed, but the
-  // primary fill is passed as `color` to hint the intended tint.
+  // Vectors: when the host has exported and converted the SVG, inline that JSX
+  // (re-indented to the current depth). Otherwise fall back to an empty
+  // react-native-svg placeholder, hinting the primary fill via `color`.
   if (node.type === 'vector') {
+    if (node.svg && node.svg.jsx !== '') {
+      return node.svg.jsx
+        .split('\n')
+        .map((line) => `${pad}${line}`)
+        .join('\n');
+    }
     const color = node.vectorColor ? ` color="${node.vectorColor}"` : '';
     return `${pad}<Svg${sizeProp('width', node.width)}${sizeProp('height', node.height)}${color} />`;
   }
@@ -78,16 +84,20 @@ function renderNode(
 
 interface ImportUsage {
   rn: Set<string>;
-  svg: boolean;
+  svg: Set<string>;
 }
 
-/** Records which react-native primitives and whether react-native-svg are used. */
+/** Records the react-native primitives and react-native-svg components used. */
 function collectImports(node: IRNode, usage: ImportUsage): void {
   if (node.componentName) {
     return; // reference to a hoisted sub-component
   }
   if (node.type === 'vector') {
-    usage.svg = true;
+    if (node.svg && node.svg.jsx !== '') {
+      node.svg.components.forEach((c) => usage.svg.add(c));
+    } else {
+      usage.svg.add('Svg');
+    }
     return;
   }
   usage.rn.add(rnTag(node));
@@ -126,7 +136,7 @@ export function generateRN(
     components = result.components;
   }
 
-  const usage: ImportUsage = { rn: new Set(), svg: false };
+  const usage: ImportUsage = { rn: new Set(), svg: new Set() };
   collectImports(mainRoot, usage);
   components.forEach((component) => collectImports(component.node, usage));
 
@@ -136,8 +146,21 @@ export function generateRN(
       `import { ${[...usage.rn].sort().join(', ')} } from 'react-native'`,
     );
   }
-  if (usage.svg) {
-    importLines.push(`import { Svg } from 'react-native-svg'`);
+  if (usage.svg.size > 0) {
+    // SvgText/SvgImage are aliases for react-native-svg's Text/Image, which
+    // collide with react-native's exports.
+    const svgImportAlias: Record<string, string> = {
+      SvgText: 'Text',
+      SvgImage: 'Image',
+    };
+    const svgSpecifiers = [...usage.svg]
+      .sort()
+      .map((name) =>
+        svgImportAlias[name] ? `${svgImportAlias[name]} as ${name}` : name,
+      );
+    importLines.push(
+      `import { ${svgSpecifiers.join(', ')} } from 'react-native-svg'`,
+    );
   }
 
   const componentFns = components.map((component) =>

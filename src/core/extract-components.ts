@@ -46,6 +46,7 @@ function analyze(
     style: node.style,
     text: node.text ?? null,
     vectorColor: node.vectorColor ?? null,
+    svg: node.svg?.jsx ?? null,
   });
   const key = `${localSig}[${childMetas.map((m) => m.key).join(',')}]`;
   const m: NodeMeta = { size, key };

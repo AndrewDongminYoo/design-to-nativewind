@@ -3,6 +3,12 @@
 
 export type IRNodeType = 'frame' | 'text' | 'image' | 'vector' | 'unknown';
 
+/** A vector converted to react-native-svg JSX plus the components it references. */
+export interface SvgRender {
+  jsx: string;
+  components: string[];
+}
+
 export type Axis = 'row' | 'column';
 
 export type Sizing = 'fill' | 'hug' | { fixed: number };
@@ -40,8 +46,12 @@ export interface IRNode {
   style: IRStyle;
   /** present when type === 'text' */
   text?: { content: string; typography: IRTypography };
+  /** Figma node id; used by the host to export vectors. Excluded from hoisting signatures. */
+  id?: string;
   /** primary solid fill of a leaf vector (#rrggbb); absent for collapsed groups */
   vectorColor?: string;
+  /** react-native-svg JSX for a vector, injected by the host after SVG export */
+  svg?: SvgRender;
   /** when set, the node renders as a reference to a hoisted sub-component (`<Name />`) */
   componentName?: string;
   children: IRNode[];

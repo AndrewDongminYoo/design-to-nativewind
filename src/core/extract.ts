@@ -141,6 +141,7 @@ export function extract(node: SceneNode): IRNode {
       : undefined;
   return {
     type,
+    id: node.id,
     name: node.name,
     layout: extractLayout(node),
     width: sizing(node, 'width'),

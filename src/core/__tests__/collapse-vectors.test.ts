@@ -92,6 +92,68 @@ describe('generateRN with vectors', () => {
     expect(code).toContain('<Svg width={24} height={24} />');
   });
 
+  it('inlines injected react-native-svg JSX and imports its components', () => {
+    const root = node({
+      name: 'Row',
+      style: { background: '#ffffff', cornerRadius: 0, opacity: 1 },
+      children: [
+        {
+          ...vector('Icon'),
+          svg: {
+            jsx: '<Svg width="12" height="12">\n  <Path d="M0 0" />\n</Svg>',
+            components: ['Path', 'Svg'],
+          },
+        },
+      ],
+    });
+    const code = generateRN(root);
+    expect(code).toContain("import { Path, Svg } from 'react-native-svg'");
+    expect(code).toContain('<Path d="M0 0" />');
+    // placeholder form is not used when real JSX is present
+    expect(code).not.toContain('<Svg width={12} height={12}');
+  });
+
+  it('aliases react-native-svg Text/Image to avoid colliding with react-native', () => {
+    const root = node({
+      name: 'Row',
+      children: [
+        {
+          type: 'text',
+          name: 'Label',
+          width: 'hug',
+          height: 'hug',
+          style: { ...baseStyle },
+          text: {
+            content: 'hi',
+            typography: {
+              fontSize: 12,
+              fontWeight: 400,
+              lineHeight: null,
+              color: null,
+            },
+          },
+          children: [],
+        },
+        {
+          ...vector('Icon'),
+          svg: {
+            jsx: '<Svg>\n  <SvgText>x</SvgText>\n  <SvgImage href="data:..." />\n</Svg>',
+            components: ['Svg', 'SvgImage', 'SvgText'],
+          },
+        },
+      ],
+    });
+    const code = generateRN(root);
+    expect(code).toContain("import { Text, View } from 'react-native'");
+    expect(code).toContain(
+      "import { Svg, Image as SvgImage, Text as SvgText } from 'react-native-svg'",
+    );
+    // no duplicate bare `Text`/`Image` specifier
+    expect(code).not.toMatch(
+      /import \{[^}]*\bImage\b[^}]*\} from 'react-native'/,
+    );
+  });
+
   it('passes a leaf vector fill color through as the Svg color prop', () => {
     const root = node({
       name: 'Row',
