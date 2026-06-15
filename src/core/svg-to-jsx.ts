@@ -24,7 +24,8 @@ const TAG_MAP: Record<string, string> = {
   polyline: 'Polyline',
   polygon: 'Polygon',
   // Text/Image collide with react-native's own exports; use aliases that
-  // generate-rn imports as `Text as SvgText` / `Image as SvgImage`.
+  // generate-rn imports as `Text as SvgText` / `Image as SvgImage`. See
+  // SVG_IMPORT_ALIAS below — keep these two in sync.
   text: 'SvgText',
   tspan: 'TSpan',
   textpath: 'TextPath',
@@ -39,6 +40,12 @@ const TAG_MAP: Record<string, string> = {
   image: 'SvgImage',
   symbol: 'Symbol',
   marker: 'Marker',
+};
+
+/** Generated tag name -> real react-native-svg export, for import aliasing. */
+export const SVG_IMPORT_ALIAS: Record<string, string> = {
+  SvgText: 'Text',
+  SvgImage: 'Image',
 };
 
 function parseAttrs(source: string): Record<string, string> {
@@ -125,11 +132,11 @@ function renderNode(node: XmlNode, depth: number, used: Set<string>): string[] {
   ];
 }
 
-/** Transforms an SVG string into react-native-svg JSX. Returns empty jsx on failure. */
-export function svgToJsx(svg: string): SvgRender {
+/** Transforms an SVG string into react-native-svg JSX. Returns null on failure. */
+export function svgToJsx(svg: string): SvgRender | null {
   const root = parseXml(svg);
   if (root === null || TAG_MAP[root.tag.toLowerCase()] === undefined) {
-    return { jsx: '', components: [] };
+    return null;
   }
   const used = new Set<string>();
   const jsx = renderNode(root, 0, used).join('\n');

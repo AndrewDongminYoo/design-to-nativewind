@@ -65,7 +65,7 @@ describe('svgToJsx', () => {
     expect(jsx).not.toContain('xmlns:xlink');
   });
 
-  it('returns empty render for non-SVG input', () => {
-    expect(svgToJsx('not svg')).toEqual({ jsx: '', components: [] });
+  it('returns null for non-SVG input', () => {
+    expect(svgToJsx('not svg')).toBeNull();
   });
 });

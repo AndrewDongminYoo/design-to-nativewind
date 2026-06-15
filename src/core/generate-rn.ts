@@ -10,6 +10,7 @@ import { mapClasses } from './map-styles';
 import { toComponentName } from './names';
 import type { GenOptions } from './options';
 import { DEFAULT_OPTIONS } from './options';
+import { SVG_IMPORT_ALIAS } from './svg-to-jsx';
 
 const INDENT = '  ';
 
@@ -52,7 +53,7 @@ function renderNode(
   // (re-indented to the current depth). Otherwise fall back to an empty
   // react-native-svg placeholder, hinting the primary fill via `color`.
   if (node.type === 'vector') {
-    if (node.svg && node.svg.jsx !== '') {
+    if (node.svg) {
       return node.svg.jsx
         .split('\n')
         .map((line) => `${pad}${line}`)
@@ -93,7 +94,7 @@ function collectImports(node: IRNode, usage: ImportUsage): void {
     return; // reference to a hoisted sub-component
   }
   if (node.type === 'vector') {
-    if (node.svg && node.svg.jsx !== '') {
+    if (node.svg) {
       node.svg.components.forEach((c) => usage.svg.add(c));
     } else {
       usage.svg.add('Svg');
@@ -147,16 +148,10 @@ export function generateRN(
     );
   }
   if (usage.svg.size > 0) {
-    // SvgText/SvgImage are aliases for react-native-svg's Text/Image, which
-    // collide with react-native's exports.
-    const svgImportAlias: Record<string, string> = {
-      SvgText: 'Text',
-      SvgImage: 'Image',
-    };
     const svgSpecifiers = [...usage.svg]
       .sort()
       .map((name) =>
-        svgImportAlias[name] ? `${svgImportAlias[name]} as ${name}` : name,
+        SVG_IMPORT_ALIAS[name] ? `${SVG_IMPORT_ALIAS[name]} as ${name}` : name,
       );
     importLines.push(
       `import { ${svgSpecifiers.join(', ')} } from 'react-native-svg'`,

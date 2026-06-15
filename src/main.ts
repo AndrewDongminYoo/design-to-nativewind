@@ -40,7 +40,8 @@ async function injectSvg(node: IRNode): Promise<void> {
         const svg = await (figmaNode as SceneNode).exportAsync({
           format: 'SVG_STRING',
         });
-        node.svg = svgToJsx(svg);
+        const rendered = svgToJsx(svg);
+        if (rendered !== null) node.svg = rendered;
       } catch {
         // Leave the placeholder if export fails (e.g. unsupported node).
       }
