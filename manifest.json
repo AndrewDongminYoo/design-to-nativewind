@@ -1,1 +1,12 @@
-{"api":"1.0.0","editorType":["figma","dev"],"id":"figma-to-nativewind","name":"Figma to NativeWind","main":"build/main.js","ui":"build/ui.js","networkAccess":{"allowedDomains":["https://api.anthropic.com"],"reasoning":"Optional LLM-assisted cleanup pass via the Claude API."}}
+{
+  "api": "1.0.0",
+  "editorType": ["figma", "dev"],
+  "id": "figma-to-nativewind",
+  "name": "Figma to NativeWind",
+  "main": "build/main.js",
+  "ui": "build/ui.js",
+  "networkAccess": {
+    "allowedDomains": ["https://api.anthropic.com"],
+    "reasoning": "Optional LLM-assisted cleanup pass via the Claude API."
+  }
+}
