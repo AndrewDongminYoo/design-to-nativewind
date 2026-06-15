@@ -7,10 +7,7 @@
   "ui": "build/ui.js",
   "capabilities": ["codegen"],
   "codegenLanguages": [
-    {
-      "label": "React Native + NativeWind",
-      "value": "rn-nativewind"
-    }
+    { "label": "React Native + NativeWind", "value": "rn-nativewind" }
   ],
   "codegenPreferences": [
     {
@@ -18,19 +15,9 @@
       "propertyName": "snap",
       "label": "Spacing snap",
       "options": [
-        {
-          "label": "Strict (exact px)",
-          "value": "strict"
-        },
-        {
-          "label": "Default (±1px)",
-          "value": "default",
-          "isDefault": true
-        },
-        {
-          "label": "Loose (±2px)",
-          "value": "loose"
-        }
+        { "label": "Strict (exact px)", "value": "strict" },
+        { "label": "Default (±1px)", "value": "default", "isDefault": true },
+        { "label": "Loose (±2px)", "value": "loose" }
       ]
     },
     {
@@ -38,15 +25,8 @@
       "propertyName": "reuse",
       "label": "Reuse repeated components",
       "options": [
-        {
-          "label": "On",
-          "value": "on",
-          "isDefault": true
-        },
-        {
-          "label": "Off",
-          "value": "off"
-        }
+        { "label": "On", "value": "on", "isDefault": true },
+        { "label": "Off", "value": "off" }
       ]
     },
     {
