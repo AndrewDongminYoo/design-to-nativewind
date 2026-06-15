@@ -45,9 +45,11 @@ function snapTolerance(snap: string | undefined): number {
 
 async function codegenOptions(): Promise<GenOptions> {
   const colorTokens = await figma.clientStorage.getAsync(COLOR_TOKENS_KEY);
+  const { snap, reuse } = figma.codegen.preferences.customSettings;
   return {
     ...DEFAULT_OPTIONS,
-    tolerance: snapTolerance(figma.codegen.preferences.customSettings.snap),
+    tolerance: snapTolerance(snap),
+    extractComponents: reuse !== 'off',
     colorTokens:
       typeof colorTokens === 'object' && colorTokens !== null
         ? (colorTokens as Record<string, string>)

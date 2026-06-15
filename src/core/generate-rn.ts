@@ -1,7 +1,12 @@
 // IR → React Native + NativeWind JSX string. Pure and unit-testable.
 
+import {
+  extractComponents,
+  type ExtractedComponent,
+} from './extract-components';
 import type { IRNode } from './ir';
 import { mapClasses } from './map-styles';
+import { toComponentName } from './names';
 import type { GenOptions } from './options';
 import { DEFAULT_OPTIONS } from './options';
 
@@ -30,6 +35,11 @@ function renderNode(
   options: RenderOptions,
 ): string {
   const pad = INDENT.repeat(depth);
+
+  if (node.componentName) {
+    return `${pad}<${node.componentName} />`;
+  }
+
   const tag = rnTag(node);
   const classes = mapClasses(node, options);
   const className = classes.length ? ` className="${classes.join(' ')}"` : '';
@@ -50,41 +60,67 @@ function renderNode(
   return `${pad}<${tag}${className}>\n${children}\n${pad}</${tag}>`;
 }
 
-function toComponentName(name: string): string {
-  const cleaned = name.replace(/[^a-zA-Z0-9]+/g, ' ').trim();
-  const pascal = cleaned
-    .split(' ')
-    .filter(Boolean)
-    .map((w) => w[0].toUpperCase() + w.slice(1))
-    .join('');
-  return /^[A-Za-z]/.test(pascal) ? pascal : `Component${pascal}`;
-}
-
 /** Collects the RN primitives used so the import line is accurate. */
 function collectImports(node: IRNode, set: Set<string>): void {
+  if (node.componentName) {
+    return; // reference to a hoisted sub-component, not an RN primitive
+  }
   set.add(rnTag(node));
   node.children.forEach((child) => collectImports(child, set));
+}
+
+function renderFunction(
+  name: string,
+  node: IRNode,
+  options: RenderOptions,
+  exported: boolean,
+): string {
+  return `${exported ? 'export ' : ''}function ${name}() {
+  return (
+${renderNode(node, 2, options)}
+  )
+}`;
 }
 
 export function generateRN(
   root: IRNode,
   options: Partial<GenOptions> = {},
 ): string {
-  const { tolerance, colorTokens } = { ...DEFAULT_OPTIONS, ...options };
-  const componentName = toComponentName(root.name || 'Component');
+  const {
+    tolerance,
+    colorTokens,
+    extractComponents: doExtract,
+  } = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  };
+  const renderOptions: RenderOptions = { tolerance, colorTokens };
+
+  let mainRoot = root;
+  let components: ExtractedComponent[] = [];
+  if (doExtract) {
+    const result = extractComponents(root);
+    mainRoot = result.root;
+    components = result.components;
+  }
 
   const imports = new Set<string>();
-  collectImports(root, imports);
+  collectImports(mainRoot, imports);
+  components.forEach((component) => collectImports(component.node, imports));
   const importLine = `import { ${[...imports].sort().join(', ')} } from 'react-native'`;
 
-  const body = renderNode(root, 2, { tolerance, colorTokens });
+  const componentFns = components.map((component) =>
+    renderFunction(component.name, component.node, renderOptions, false),
+  );
+  const mainFn = renderFunction(
+    toComponentName(mainRoot.name || 'Component'),
+    mainRoot,
+    renderOptions,
+    true,
+  );
 
   return `${importLine}
 
-export function ${componentName}() {
-  return (
-${body}
-  )
-}
+${[...componentFns, mainFn].join('\n\n')}
 `;
 }

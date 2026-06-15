@@ -80,6 +80,22 @@
         ]
       },
       {
+        "itemType": "select",
+        "propertyName": "reuse",
+        "label": "Reuse repeated components",
+        "options": [
+          {
+            "label": "On",
+            "value": "on",
+            "isDefault": true
+          },
+          {
+            "label": "Off",
+            "value": "off"
+          }
+        ]
+      },
+      {
         "itemType": "action",
         "propertyName": "import",
         "label": "Import theme (tailwind.config / global.css)…"

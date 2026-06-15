@@ -40,5 +40,7 @@ export interface IRNode {
   style: IRStyle;
   /** present when type === 'text' */
   text?: { content: string; typography: IRTypography };
+  /** when set, the node renders as a reference to a hoisted sub-component (`<Name />`) */
+  componentName?: string;
   children: IRNode[];
 }
