@@ -15,20 +15,20 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@create-figma-plugin/ui": "^4.0.1",
-    "@create-figma-plugin/utilities": "^4.0.1",
-    "preact": "^10.25.4"
+    "@create-figma-plugin/ui": "^4.0.3",
+    "@create-figma-plugin/utilities": "^4.0.3",
+    "preact": "^10.29.2"
   },
   "devDependencies": {
     "@create-figma-plugin/build": "4.0.3",
-    "@create-figma-plugin/tsconfig": "^4.0.1",
-    "@figma/plugin-typings": "^1.109.0",
-    "@typescript-eslint/eslint-plugin": "^8.20.0",
-    "@typescript-eslint/parser": "^8.20.0",
-    "eslint": "^8.57.1",
-    "patch-package": "^8.0.0",
-    "typescript": "^5.7.3",
-    "vitest": "^2.1.8"
+    "@create-figma-plugin/tsconfig": "^4.0.3",
+    "@figma/plugin-typings": "^1.128.0",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "eslint": "^10.5.0",
+    "patch-package": "^8.0.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "figma-plugin": {
     "editorType": [
