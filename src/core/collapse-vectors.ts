@@ -23,5 +23,8 @@ export function collapseVectors(node: IRNode): IRNode {
     return { ...node, type: 'vector', children: [] };
   }
 
-  return { ...node, children };
+  // Preserve referential identity when no descendant collapsed — avoids
+  // allocating a new node + children array on every untouched subtree.
+  const changed = children.some((child, i) => child !== node.children[i]);
+  return changed ? { ...node, children } : node;
 }
