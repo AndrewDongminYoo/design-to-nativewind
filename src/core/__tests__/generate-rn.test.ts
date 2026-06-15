@@ -89,4 +89,19 @@ describe('generateRN', () => {
     expect(code).toContain('<Text');
     expect(code).toContain('>Hello</Text>');
   });
+
+  it('honors the snap tolerance option (Loose vs Strict)', () => {
+    const node = frame({
+      layout: {
+        direction: 'column',
+        justify: 'start',
+        align: 'start',
+        gap: 14,
+        padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      },
+    });
+    // 14px is 2px from the nearest scale step (12px -> gap-3).
+    expect(generateRN(node, { tolerance: 2 })).toContain('gap-3');
+    expect(generateRN(node, { tolerance: 0 })).toContain('gap-[14px]');
+  });
 });

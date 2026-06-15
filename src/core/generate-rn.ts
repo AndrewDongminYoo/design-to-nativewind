@@ -1,7 +1,9 @@
 // IR → React Native + NativeWind JSX string. Pure and unit-testable.
 
 import type { IRNode } from './ir';
-import { mapClasses, SNAP_TOLERANCE_PX } from './map-styles';
+import { mapClasses } from './map-styles';
+import type { GenOptions } from './options';
+import { DEFAULT_OPTIONS } from './options';
 
 const INDENT = '  ';
 
@@ -58,15 +60,11 @@ function collectImports(node: IRNode, set: Set<string>): void {
   node.children.forEach((child) => collectImports(child, set));
 }
 
-export interface GenerateOptions {
-  tolerance?: number;
-}
-
 export function generateRN(
   root: IRNode,
-  options: GenerateOptions = {},
+  options: Partial<GenOptions> = {},
 ): string {
-  const tolerance = options.tolerance ?? SNAP_TOLERANCE_PX;
+  const { tolerance } = { ...DEFAULT_OPTIONS, ...options };
   const componentName = toComponentName(root.name || 'Component');
 
   const imports = new Set<string>();

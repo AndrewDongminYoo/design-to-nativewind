@@ -9,6 +9,18 @@
   "codegenLanguages": [
     { "label": "React Native + NativeWind", "value": "rn-nativewind" }
   ],
+  "codegenPreferences": [
+    {
+      "itemType": "select",
+      "propertyName": "snap",
+      "label": "Spacing snap",
+      "options": [
+        { "label": "Strict (exact px)", "value": "strict" },
+        { "label": "Default (±1px)", "value": "default", "isDefault": true },
+        { "label": "Loose (±2px)", "value": "loose" }
+      ]
+    }
+  ],
   "networkAccess": {
     "allowedDomains": ["https://api.anthropic.com"],
     "reasoning": "Optional LLM-assisted cleanup pass via the Claude API."

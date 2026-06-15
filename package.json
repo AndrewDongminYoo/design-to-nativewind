@@ -58,6 +58,28 @@
         "value": "rn-nativewind"
       }
     ],
+    "codegenPreferences": [
+      {
+        "itemType": "select",
+        "propertyName": "snap",
+        "label": "Spacing snap",
+        "options": [
+          {
+            "label": "Strict (exact px)",
+            "value": "strict"
+          },
+          {
+            "label": "Default (±1px)",
+            "value": "default",
+            "isDefault": true
+          },
+          {
+            "label": "Loose (±2px)",
+            "value": "loose"
+          }
+        ]
+      }
+    ],
     "networkAccess": {
       "allowedDomains": [
         "https://api.anthropic.com"

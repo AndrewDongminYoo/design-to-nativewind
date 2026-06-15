@@ -2,6 +2,7 @@ import { emit, on, showUI } from '@create-figma-plugin/utilities';
 
 import { extract } from './core/extract';
 import { generateRN } from './core/generate-rn';
+import { DEFAULT_OPTIONS, type GenOptions } from './core/options';
 
 export interface ConvertHandler {
   name: 'CONVERT';
@@ -18,8 +19,27 @@ export interface ConversionErrorHandler {
   handler: (message: string) => void;
 }
 
-function nodeToCode(node: SceneNode): string {
-  return generateRN(extract(node));
+function nodeToCode(node: SceneNode, options?: Partial<GenOptions>): string {
+  return generateRN(extract(node), options);
+}
+
+/** Maps the `snap` codegen preference to a px tolerance. */
+function snapTolerance(snap: string | undefined): number {
+  switch (snap) {
+    case 'strict':
+      return 0;
+    case 'loose':
+      return 2;
+    default:
+      return 1;
+  }
+}
+
+function codegenOptions(): Partial<GenOptions> {
+  return {
+    ...DEFAULT_OPTIONS,
+    tolerance: snapTolerance(figma.codegen.preferences.customSettings.snap),
+  };
 }
 
 function convertSelection(): void {
@@ -45,7 +65,7 @@ export default function main(): void {
       {
         title: 'React Native + NativeWind',
         language: 'TYPESCRIPT',
-        code: nodeToCode(node),
+        code: nodeToCode(node, codegenOptions()),
       },
     ]);
     return;
