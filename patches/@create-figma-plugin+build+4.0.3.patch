@@ -1,0 +1,12 @@
+diff --git a/node_modules/@create-figma-plugin/build/lib/watch-async/create-watch-ignore-regex.js b/node_modules/@create-figma-plugin/build/lib/watch-async/create-watch-ignore-regex.js
+index f25342e..0d3feda 100644
+--- a/node_modules/@create-figma-plugin/build/lib/watch-async/create-watch-ignore-regex.js
++++ b/node_modules/@create-figma-plugin/build/lib/watch-async/create-watch-ignore-regex.js
+@@ -3,6 +3,7 @@ export function createWatchIgnoreRegex(outputDirectoryPath) {
+     return new RegExp([
+         `^${outputDirectoryPath}`,
+         '^.git',
++        '^\\.trunk',
+         '^node_modules',
+         '^manifest.json$',
+         '^package-lock.json$',

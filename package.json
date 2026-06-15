@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@create-figma-plugin/ui": "^4.0.1",
@@ -19,23 +20,29 @@
     "preact": "^10.25.4"
   },
   "devDependencies": {
-    "@create-figma-plugin/build": "^4.0.1",
+    "@create-figma-plugin/build": "4.0.3",
     "@create-figma-plugin/tsconfig": "^4.0.1",
     "@figma/plugin-typings": "^1.109.0",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
     "eslint": "^8.57.1",
+    "patch-package": "^8.0.0",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
   },
   "figma-plugin": {
-    "editorType": ["figma", "dev"],
+    "editorType": [
+      "figma",
+      "dev"
+    ],
     "id": "figma-to-nativewind",
     "name": "Figma to NativeWind",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
     "networkAccess": {
-      "allowedDomains": ["https://api.anthropic.com"],
+      "allowedDomains": [
+        "https://api.anthropic.com"
+      ],
       "reasoning": "Optional LLM-assisted cleanup pass via the Claude API."
     }
   }
