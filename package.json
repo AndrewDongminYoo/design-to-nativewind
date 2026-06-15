@@ -22,13 +22,22 @@
   "devDependencies": {
     "@create-figma-plugin/build": "4.0.3",
     "@create-figma-plugin/tsconfig": "^4.0.3",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
     "@figma/plugin-typings": "^1.128.0",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
     "eslint": "^10.5.0",
+    "globals": "^17.6.0",
     "patch-package": "^8.0.1",
     "typescript": "^6.0.3",
+    "vite": "^8.0.16",
     "vitest": "^4.1.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.28.1"
+    }
   },
   "figma-plugin": {
     "editorType": [
