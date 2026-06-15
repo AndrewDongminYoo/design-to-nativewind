@@ -1,6 +1,19 @@
 // IR style → NativeWind utility classes. Pure and unit-testable.
 
 import type { IRNode, Sizing } from './ir';
+import type { GenOptions } from './options';
+
+type MapOptions = Partial<Pick<GenOptions, 'tolerance' | 'colorTokens'>>;
+
+/** Returns `bg-primary` when the hex maps to a token, else `bg-[#hex]`. */
+function colorClass(
+  prefix: string,
+  hex: string,
+  colorTokens: Record<string, string>,
+): string {
+  const token = colorTokens[hex.toLowerCase()];
+  return token ? `${prefix}-${token}` : `${prefix}-[${hex}]`;
+}
 
 // Tailwind spacing scale (rem steps) mapped to px at the default 16px root.
 // We snap to the nearest step within SNAP_TOLERANCE_PX, else emit an arbitrary value.
@@ -72,10 +85,9 @@ const ALIGN: Record<string, string> = {
 };
 
 /** Returns the ordered, de-duplicated NativeWind classes for a node. */
-export function mapClasses(
-  node: IRNode,
-  tolerance = SNAP_TOLERANCE_PX,
-): string[] {
+export function mapClasses(node: IRNode, options: MapOptions = {}): string[] {
+  const tolerance = options.tolerance ?? SNAP_TOLERANCE_PX;
+  const colorTokens = options.colorTokens ?? {};
   const classes: string[] = [];
 
   if (node.layout) {
@@ -109,7 +121,8 @@ export function mapClasses(
   const h = sizingClass('h', node.height);
   if (h) classes.push(h);
 
-  if (node.style.background) classes.push(`bg-[${node.style.background}]`);
+  if (node.style.background)
+    classes.push(colorClass('bg', node.style.background, colorTokens));
   if (node.style.cornerRadius > 0) {
     const step = snapSpacing(node.style.cornerRadius, tolerance);
     classes.push(
@@ -125,7 +138,7 @@ export function mapClasses(
   if (node.text) {
     classes.push(`text-[${Math.round(node.text.typography.fontSize)}px]`);
     if (node.text.typography.color)
-      classes.push(`text-[${node.text.typography.color}]`);
+      classes.push(colorClass('text', node.text.typography.color, colorTokens));
     if (node.text.typography.fontWeight >= 700) classes.push('font-bold');
     else if (node.text.typography.fontWeight >= 500)
       classes.push('font-medium');

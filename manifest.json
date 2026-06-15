@@ -19,6 +19,11 @@
         { "label": "Default (±1px)", "value": "default", "isDefault": true },
         { "label": "Loose (±2px)", "value": "loose" }
       ]
+    },
+    {
+      "itemType": "action",
+      "propertyName": "import",
+      "label": "Import theme (tailwind.config / global.css)…"
     }
   ],
   "networkAccess": {

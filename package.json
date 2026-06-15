@@ -78,6 +78,11 @@
             "value": "loose"
           }
         ]
+      },
+      {
+        "itemType": "action",
+        "propertyName": "import",
+        "label": "Import theme (tailwind.config / global.css)…"
       }
     ],
     "networkAccess": {

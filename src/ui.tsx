@@ -8,16 +8,17 @@ import {
   VerticalSpace,
 } from '@create-figma-plugin/ui';
 import { emit, on } from '@create-figma-plugin/utilities';
-import { Fragment, h } from 'preact';
+import { Fragment, h, type JSX } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
 import type {
   CodeGeneratedHandler,
   ConversionErrorHandler,
   ConvertHandler,
+  ImportThemeHandler,
 } from './main';
 
-function Plugin() {
+function ConvertView() {
   const [code, setCode] = useState<string>('');
   const [error, setError] = useState<string>('');
 
@@ -87,6 +88,44 @@ function Plugin() {
       <VerticalSpace space="large" />
     </Container>
   );
+}
+
+function ImportView() {
+  const handleFile = useCallback(
+    (event: JSX.TargetedEvent<HTMLInputElement>) => {
+      const file = event.currentTarget.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        emit<ImportThemeHandler>('IMPORT_THEME', String(reader.result));
+      };
+      reader.readAsText(file);
+    },
+    [],
+  );
+
+  return (
+    <Container space="medium">
+      <VerticalSpace space="large" />
+      <Text>
+        <Muted>
+          Import a tailwind.config.js or global.css to map colors to tokens.
+          Only static color values are read; the file is never executed.
+        </Muted>
+      </Text>
+      <VerticalSpace space="medium" />
+      <input
+        type="file"
+        accept=".js,.cjs,.mjs,.ts,.css"
+        onChange={handleFile}
+      />
+      <VerticalSpace space="large" />
+    </Container>
+  );
+}
+
+function Plugin(props: { mode?: 'convert' | 'import' }) {
+  return props.mode === 'import' ? <ImportView /> : <ConvertView />;
 }
 
 export default render(Plugin);

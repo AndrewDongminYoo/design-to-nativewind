@@ -57,6 +57,17 @@ describe('mapClasses', () => {
     expect(classes).toContain('gap-2');
     expect(classes).toContain('p-4');
   });
+
+  it('maps a background hex to a color token when provided', () => {
+    const node = frame({
+      style: { background: '#3b82f6', cornerRadius: 0, opacity: 1 },
+    });
+    expect(
+      mapClasses(node, { colorTokens: { '#3b82f6': 'primary' } }),
+    ).toContain('bg-primary');
+    // Falls back to an arbitrary value when the hex is not in the token map.
+    expect(mapClasses(node)).toContain('bg-[#3b82f6]');
+  });
 });
 
 describe('generateRN', () => {

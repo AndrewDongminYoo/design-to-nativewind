@@ -22,10 +22,16 @@ function escapeText(content: string): string {
   return content.replace(/[{}]/g, (c) => `{'${c}'}`);
 }
 
-function renderNode(node: IRNode, depth: number, tolerance: number): string {
+type RenderOptions = Pick<GenOptions, 'tolerance' | 'colorTokens'>;
+
+function renderNode(
+  node: IRNode,
+  depth: number,
+  options: RenderOptions,
+): string {
   const pad = INDENT.repeat(depth);
   const tag = rnTag(node);
-  const classes = mapClasses(node, tolerance);
+  const classes = mapClasses(node, options);
   const className = classes.length ? ` className="${classes.join(' ')}"` : '';
 
   if (tag === 'Text' && node.text) {
@@ -39,7 +45,7 @@ function renderNode(node: IRNode, depth: number, tolerance: number): string {
   }
 
   const children = node.children
-    .map((child) => renderNode(child, depth + 1, tolerance))
+    .map((child) => renderNode(child, depth + 1, options))
     .join('\n');
   return `${pad}<${tag}${className}>\n${children}\n${pad}</${tag}>`;
 }
@@ -64,14 +70,14 @@ export function generateRN(
   root: IRNode,
   options: Partial<GenOptions> = {},
 ): string {
-  const { tolerance } = { ...DEFAULT_OPTIONS, ...options };
+  const { tolerance, colorTokens } = { ...DEFAULT_OPTIONS, ...options };
   const componentName = toComponentName(root.name || 'Component');
 
   const imports = new Set<string>();
   collectImports(root, imports);
   const importLine = `import { ${[...imports].sort().join(', ')} } from 'react-native'`;
 
-  const body = renderNode(root, 2, tolerance);
+  const body = renderNode(root, 2, { tolerance, colorTokens });
 
   return `${importLine}
 
