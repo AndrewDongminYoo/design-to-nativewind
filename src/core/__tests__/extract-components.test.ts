@@ -48,9 +48,10 @@ describe('extractComponents', () => {
     const { root: newRoot, components } = extractComponents(root);
 
     expect(components).toHaveLength(1);
-    expect(
-      newRoot.children.every((c) => c.componentName === components[0].name),
-    ).toBe(true);
+    expect(newRoot.children.map((c) => c.componentName)).toEqual([
+      components[0].name,
+      components[0].name,
+    ]);
   });
 
   it('does not extract subtrees below the size threshold', () => {
