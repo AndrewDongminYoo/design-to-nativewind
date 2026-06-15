@@ -1,7 +1,7 @@
 // Intermediate representation (IR): framework-agnostic node tree.
 // Pure types only — no Figma or Preact dependency, so downstream modules stay testable.
 
-export type IRNodeType = 'frame' | 'text' | 'image' | 'unknown';
+export type IRNodeType = 'frame' | 'text' | 'image' | 'vector' | 'unknown';
 
 export type Axis = 'row' | 'column';
 

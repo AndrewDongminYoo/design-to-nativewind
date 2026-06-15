@@ -30,6 +30,15 @@ function nodeType(node: SceneNode): IRNodeType {
     return 'image';
   }
   if (
+    node.type === 'VECTOR' ||
+    node.type === 'BOOLEAN_OPERATION' ||
+    node.type === 'STAR' ||
+    node.type === 'LINE' ||
+    node.type === 'POLYGON'
+  ) {
+    return 'vector';
+  }
+  if (
     node.type === 'FRAME' ||
     node.type === 'COMPONENT' ||
     node.type === 'INSTANCE' ||
@@ -52,7 +61,9 @@ function sizing(node: SceneNode, dimension: 'width' | 'height'): Sizing {
 }
 
 function extractStyle(node: SceneNode): IRStyle {
-  const background = 'fills' in node ? firstSolidFill(node.fills) : null;
+  // A text node's fill is its glyph color (captured in typography), not a background.
+  const background =
+    node.type !== 'TEXT' && 'fills' in node ? firstSolidFill(node.fills) : null;
   const cornerRadius =
     'cornerRadius' in node && typeof node.cornerRadius === 'number'
       ? node.cornerRadius
@@ -113,10 +124,14 @@ function extractText(node: SceneNode): IRNode['text'] {
 }
 
 export function extract(node: SceneNode): IRNode {
+  const type = nodeType(node);
+  // Vectors are opaque shapes; don't descend into their internals.
   const children =
-    'children' in node ? node.children.map((child) => extract(child)) : [];
+    type !== 'vector' && 'children' in node
+      ? node.children.map((child) => extract(child))
+      : [];
   return {
-    type: nodeType(node),
+    type,
     name: node.name,
     layout: extractLayout(node),
     width: sizing(node, 'width'),

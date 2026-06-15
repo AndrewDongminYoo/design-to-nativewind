@@ -1,10 +1,11 @@
 // IR → React Native + NativeWind JSX string. Pure and unit-testable.
 
+import { collapseVectors } from './collapse-vectors';
 import {
-  extractComponents,
+  extractComponents as hoistRepeatedSubtrees,
   type ExtractedComponent,
 } from './extract-components';
-import type { IRNode } from './ir';
+import type { IRNode, Sizing } from './ir';
 import { mapClasses } from './map-styles';
 import { toComponentName } from './names';
 import type { GenOptions } from './options';
@@ -27,6 +28,13 @@ function escapeText(content: string): string {
   return content.replace(/[{}]/g, (c) => `{'${c}'}`);
 }
 
+/** Emits ` width={52}` for a fixed dimension, nothing for fill/hug. */
+function sizeProp(name: 'width' | 'height', sizing: Sizing): string {
+  return typeof sizing === 'object'
+    ? ` ${name}={${Math.round(sizing.fixed)}}`
+    : '';
+}
+
 type RenderOptions = Pick<GenOptions, 'tolerance' | 'colorTokens'>;
 
 function renderNode(
@@ -38,6 +46,12 @@ function renderNode(
 
   if (node.componentName) {
     return `${pad}<${node.componentName} />`;
+  }
+
+  // Vectors are emitted as an empty react-native-svg placeholder for the
+  // developer to fill in; the original paths are not reconstructed.
+  if (node.type === 'vector') {
+    return `${pad}<Svg${sizeProp('width', node.width)}${sizeProp('height', node.height)} />`;
   }
 
   const tag = rnTag(node);
@@ -60,13 +74,22 @@ function renderNode(
   return `${pad}<${tag}${className}>\n${children}\n${pad}</${tag}>`;
 }
 
-/** Collects the RN primitives used so the import line is accurate. */
-function collectImports(node: IRNode, set: Set<string>): void {
+interface ImportUsage {
+  rn: Set<string>;
+  svg: boolean;
+}
+
+/** Records which react-native primitives and whether react-native-svg are used. */
+function collectImports(node: IRNode, usage: ImportUsage): void {
   if (node.componentName) {
-    return; // reference to a hoisted sub-component, not an RN primitive
+    return; // reference to a hoisted sub-component
   }
-  set.add(rnTag(node));
-  node.children.forEach((child) => collectImports(child, set));
+  if (node.type === 'vector') {
+    usage.svg = true;
+    return;
+  }
+  usage.rn.add(rnTag(node));
+  node.children.forEach((child) => collectImports(child, usage));
 }
 
 function renderFunction(
@@ -86,28 +109,34 @@ export function generateRN(
   root: IRNode,
   options: Partial<GenOptions> = {},
 ): string {
-  const {
-    tolerance,
-    colorTokens,
-    extractComponents: doExtract,
-  } = {
+  const { tolerance, colorTokens, extractComponents } = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
   const renderOptions: RenderOptions = { tolerance, colorTokens };
 
-  let mainRoot = root;
+  const collapsedRoot = collapseVectors(root);
+  let mainRoot = collapsedRoot;
   let components: ExtractedComponent[] = [];
-  if (doExtract) {
-    const result = extractComponents(root);
+  if (extractComponents) {
+    const result = hoistRepeatedSubtrees(collapsedRoot);
     mainRoot = result.root;
     components = result.components;
   }
 
-  const imports = new Set<string>();
-  collectImports(mainRoot, imports);
-  components.forEach((component) => collectImports(component.node, imports));
-  const importLine = `import { ${[...imports].sort().join(', ')} } from 'react-native'`;
+  const usage: ImportUsage = { rn: new Set(), svg: false };
+  collectImports(mainRoot, usage);
+  components.forEach((component) => collectImports(component.node, usage));
+
+  const importLines: string[] = [];
+  if (usage.rn.size > 0) {
+    importLines.push(
+      `import { ${[...usage.rn].sort().join(', ')} } from 'react-native'`,
+    );
+  }
+  if (usage.svg) {
+    importLines.push(`import { Svg } from 'react-native-svg'`);
+  }
 
   const componentFns = components.map((component) =>
     renderFunction(component.name, component.node, renderOptions, false),
@@ -119,7 +148,7 @@ export function generateRN(
     true,
   );
 
-  return `${importLine}
+  return `${importLines.join('\n')}
 
 ${[...componentFns, mainFn].join('\n\n')}
 `;
