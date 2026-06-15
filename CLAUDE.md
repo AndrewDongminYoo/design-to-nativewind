@@ -10,10 +10,10 @@ Conversion is deterministic by default (rule-based Figma-property → NativeWind
 
 ## Commands
 
-The package manager is **pnpm** (`pnpm-lock.yaml`); the `npm`-prefixed scripts below work under either.
+The package manager is **pnpm** (`pnpm-lock.yaml`); the `pnpm`-prefixed scripts below also work under `npm` (`npm run <script>`).
 
 ```bash
-pnpm install          # runs patch-package via postinstall (see Patches below)
+pnpm install          # applies pnpm patchedDependencies (see Patches below)
 pnpm watch            # build the plugin in watch mode (build/main.js, build/ui.js)
 pnpm build            # one-off typechecked + minified build
 pnpm test             # vitest run (all unit tests)
@@ -23,7 +23,7 @@ pnpm typecheck        # tsc --noEmit
 
 # Run a single test file or filter by name
 pnpm vitest run src/core/__tests__/generate-rn.test.ts
-pnpm vitest run -t "snaps spacing"
+pnpm vitest run -t "snapSpacing"
 ```
 
 Minimum verification after changes: `pnpm build && pnpm test`.
@@ -67,5 +67,5 @@ Numeric values (spacing, radius, font size) snap to the nearest Tailwind/NativeW
 - **TypeScript strict** (extends `@create-figma-plugin/tsconfig`). `tsconfig.json` excludes `src/**/__tests__/**` and emits nothing — the build tool handles compilation.
 - **Tests live in `src/**/**tests**/\*.test.ts`** and import the pure modules directly with IR fixtures — no Figma runtime. `extract.ts`is tested against mocked`figma` node objects.
 - **`manifest.json` is generated** by `build-figma-plugin` from the `figma-plugin` field in [package.json](package.json) (which points `main`/`ui` at the `src/` sources). Edit plugin metadata there, not in the generated `manifest.json`. `networkAccess` is restricted to `https://api.anthropic.com`.
-- **Patches:** [patches/](patches/) patches `@create-figma-plugin/build` so its watcher ignores `.trunk`. `vitest.config.ts` likewise scopes discovery to `src/` — globbing the root follows `.trunk` symlinks into `~/.cache/trunk` and collects unrelated tests. Keep both guards when touching build/test config.
+- **Patches:** [patches/](patches/) patches `@create-figma-plugin/build` so its watcher ignores `.trunk`/`.remember`/`.claude`, applied via pnpm's `patchedDependencies` (package.json `pnpm` field). Re-edit with `pnpm patch "@create-figma-plugin/build@4.0.3"` then `pnpm patch-commit <dir>` — not patch-package, which can't read `pnpm-lock.yaml`. `vitest.config.ts` likewise scopes discovery to `src/` — globbing the root follows `.trunk` symlinks into `~/.cache/trunk` and collects unrelated tests. Keep both guards when touching build/test config.
 - This is a personal-account project (`AndrewDongminYoo`); keep it isolated from any work/org codebases.
