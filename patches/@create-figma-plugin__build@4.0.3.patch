@@ -1,0 +1,14 @@
+diff --git a/lib/watch-async/create-watch-ignore-regex.js b/lib/watch-async/create-watch-ignore-regex.js
+index f25342e33ddd72123f744389411050b2f67c5845..8a5191500e6509531738b63e71dcf116945c62e1 100644
+--- a/lib/watch-async/create-watch-ignore-regex.js
++++ b/lib/watch-async/create-watch-ignore-regex.js
+@@ -3,6 +3,9 @@ export function createWatchIgnoreRegex(outputDirectoryPath) {
+     return new RegExp([
+         `^${outputDirectoryPath}`,
+         '^.git',
++        '^\\.trunk',
++        '^\\.remember',
++        '^\\.claude',
+         '^node_modules',
+         '^manifest.json$',
+         '^package-lock.json$',
