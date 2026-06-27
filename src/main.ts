@@ -2,7 +2,7 @@ import { emit, on, showUI } from '@create-figma-plugin/utilities';
 
 import { collapseVectors } from './core/collapse-vectors';
 import { extract } from './core/extract';
-import { generateRN } from './core/generate-rn';
+import { generateRN, generateRNMulti } from './core/generate-rn';
 import type { IRNode } from './core/ir';
 import { DEFAULT_OPTIONS, type GenOptions } from './core/options';
 import { parseThemeColors } from './core/parse-theme';
@@ -77,13 +77,44 @@ async function injectSvg(node: IRNode): Promise<void> {
   await Promise.all(node.children.map((child) => injectSvg(child)));
 }
 
+async function nodeToIr(node: SceneNode): Promise<IRNode> {
+  const ir = collapseVectors(extract(node));
+  await injectSvg(ir);
+  return ir;
+}
+
 async function nodeToCode(
   node: SceneNode,
   options?: Partial<GenOptions>,
 ): Promise<GeneratedCode> {
-  const ir = collapseVectors(extract(node));
-  await injectSvg(ir);
+  const ir = await nodeToIr(node);
   return { ir, code: generateRN(ir, options) };
+}
+
+/** Wraps multiple frame IRs in a synthetic container so refinement still gets a
+ * single IR for context; a lone frame passes through unchanged. */
+function wrapRoots(irs: IRNode[]): IRNode {
+  if (irs.length === 1) return irs[0];
+  return {
+    type: 'frame',
+    name: 'Selection',
+    width: 'hug',
+    height: 'hug',
+    style: { background: null, cornerRadius: 0, opacity: 1 },
+    children: irs,
+  };
+}
+
+/** Converts every top-level selected node into one file (one component per frame). */
+async function selectionToCode(
+  nodes: readonly SceneNode[],
+  options?: Partial<GenOptions>,
+): Promise<GeneratedCode> {
+  const irs: IRNode[] = [];
+  for (const node of nodes) {
+    irs.push(await nodeToIr(node));
+  }
+  return { ir: wrapRoots(irs), code: generateRNMulti(irs, options) };
 }
 
 /** Maps the `snap` codegen preference to a px tolerance. */
@@ -135,8 +166,11 @@ async function convertSelection(): Promise<void> {
     return;
   }
 
-  // v1: convert the first top-level selected node. Multi-frame handling is a future milestone.
-  emit<CodeGeneratedHandler>('CODE_GENERATED', await nodeToCode(selection[0]));
+  // Convert every top-level selected node into one file (one component per frame).
+  emit<CodeGeneratedHandler>(
+    'CODE_GENERATED',
+    await selectionToCode(selection),
+  );
 }
 
 async function sendConfig(): Promise<void> {

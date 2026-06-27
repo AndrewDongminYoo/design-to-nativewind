@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { IRNode } from '../ir';
-import { generateRN } from '../generate-rn';
+import { generateRN, generateRNMulti } from '../generate-rn';
 import { mapClasses, snapSpacing, spacingClass } from '../map-styles';
 
 const baseStyle = { background: null, cornerRadius: 0, opacity: 1 } as const;
@@ -114,5 +114,32 @@ describe('generateRN', () => {
     // 14px is 2px from the nearest scale step (12px -> gap-3).
     expect(generateRN(node, { tolerance: 2 })).toContain('gap-3');
     expect(generateRN(node, { tolerance: 0 })).toContain('gap-[14px]');
+  });
+});
+
+describe('generateRNMulti', () => {
+  it('matches single-frame generateRN for one root', () => {
+    const node = frame({ name: 'Card Header' });
+    expect(generateRNMulti([node])).toBe(generateRN(node));
+  });
+
+  it('emits one exported component per frame under a shared import block', () => {
+    const code = generateRNMulti([
+      frame({ name: 'Header' }),
+      frame({ name: 'Footer' }),
+    ]);
+    expect(code).toContain('export function Header()');
+    expect(code).toContain('export function Footer()');
+    // One shared react-native import, not one per frame.
+    expect(code.match(/from 'react-native'/g)).toHaveLength(1);
+  });
+
+  it('deduplicates colliding component names file-wide', () => {
+    const code = generateRNMulti([
+      frame({ name: 'Card' }),
+      frame({ name: 'Card' }),
+    ]);
+    expect(code).toContain('export function Card()');
+    expect(code).toContain('export function Card2()');
   });
 });

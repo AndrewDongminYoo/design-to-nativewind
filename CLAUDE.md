@@ -46,7 +46,7 @@ When adding a message type, declare its handler interface in `main.ts` so both s
 `main()` forks on `figma.mode`:
 
 - **Codegen** (Dev Mode code generator, the primary path) — registers `figma.codegen.on('generate')` and stays resident; the selected node is converted on every selection change with no run UI (`showUI` is disallowed inside the generate callback). Codegen preferences (`snap`, `reuse`, `import`) come from the `codegenPreferences` in [package.json](package.json) and are read via `figma.codegen.preferences.customSettings`. The `import` action is an exception: it fires `preferenceschange`, where `showUI` _is_ allowed, to open the theme-import iframe.
-- **Run** (design mode / Dev Mode run) — shows the preview + copy UI and converts the first selected node on a `CONVERT` message.
+- **Run** (design mode / Dev Mode run) — shows the preview + copy UI and converts every top-level selected node on a `CONVERT` message, emitting one file with one exported component per frame (`generateRNMulti`). Codegen mode stays single-node (Figma hands the generator one node at a time).
 
 Codegen preferences map to pipeline behavior via `codegenOptions()`: `snap` → px `tolerance`, `reuse` → `extractComponents`, and the imported theme → `colorTokens` (persisted in `figma.clientStorage` under `colorTokens`).
 

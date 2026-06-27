@@ -181,5 +181,5 @@ mapping from an imported Tailwind/CSS theme.
 ## 13. Open Questions
 
 - Token mapping: ✅ resolved — colors map to imported theme tokens (`parse-theme.ts`); spacing still snaps to the Tailwind scale. Spacing-token mapping remains open.
-- Multi-frame selection: emit one component per frame or a combined file? (Open; current v1 converts the first top-level selected node.)
+- Multi-frame selection: ✅ resolved — the run plugin converts every top-level selected node into one file with one exported component per frame (`generateRNMulti`), names deduplicated file-wide. Hoisting stays per-frame (no cross-frame component sharing yet). Codegen mode remains single-node.
 - Component extraction heuristics for repeated subtrees: ✅ resolved — implemented deterministically in `extract-components.ts` (≥2 occurrences, ≥3 nodes) rather than via the LLM. Nested repeats inside an extracted component stay inline (conservative baseline) — tuning is open.

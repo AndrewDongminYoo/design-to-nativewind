@@ -118,8 +118,46 @@ ${renderNode(node, 2, options)}
 }`;
 }
 
+/** Reserves `name` in `used`, suffixing `2`, `3`, … on collision. */
+function makeUnique(name: string, used: Set<string>): string {
+  if (!used.has(name)) {
+    used.add(name);
+    return name;
+  }
+  let i = 2;
+  while (used.has(`${name}${i}`)) i++;
+  const unique = `${name}${i}`;
+  used.add(unique);
+  return unique;
+}
+
+/** Rewrites `componentName` references so renamed sub-components keep resolving. */
+function renameRefs(node: IRNode, renames: Map<string, string>): IRNode {
+  const renamed = node.componentName
+    ? renames.get(node.componentName)
+    : undefined;
+  return {
+    ...node,
+    ...(renamed ? { componentName: renamed } : {}),
+    children: node.children.map((child) => renameRefs(child, renames)),
+  };
+}
+
 export function generateRN(
   root: IRNode,
+  options: Partial<GenOptions> = {},
+): string {
+  return generateRNMulti([root], options);
+}
+
+/**
+ * Renders one or more selected frames into a single file: a shared import block,
+ * each frame's hoisted sub-components, and one exported component per frame.
+ * Function names are made unique file-wide; hoisting stays per-frame (no
+ * cross-frame component sharing in v1).
+ */
+export function generateRNMulti(
+  roots: IRNode[],
   options: Partial<GenOptions> = {},
 ): string {
   const { tolerance, colorTokens, extractComponents } = {
@@ -128,18 +166,45 @@ export function generateRN(
   };
   const renderOptions: RenderOptions = { tolerance, colorTokens };
 
-  const collapsedRoot = collapseVectors(root);
-  let mainRoot = collapsedRoot;
-  let components: ExtractedComponent[] = [];
-  if (extractComponents) {
-    const result = hoistRepeatedSubtrees(collapsedRoot);
-    mainRoot = result.root;
-    components = result.components;
-  }
-
+  const usedNames = new Set<string>();
   const usage: ImportUsage = { rn: new Set(), svg: new Set() };
-  collectImports(mainRoot, usage);
-  components.forEach((component) => collectImports(component.node, usage));
+  const fns: string[] = [];
+
+  for (const root of roots) {
+    const collapsedRoot = collapseVectors(root);
+    let mainRoot = collapsedRoot;
+    let components: ExtractedComponent[] = [];
+    if (extractComponents) {
+      const result = hoistRepeatedSubtrees(collapsedRoot);
+      mainRoot = result.root;
+      components = result.components;
+    }
+
+    // Sub-components first so we can remap the main tree's references to them.
+    const renames = new Map<string, string>();
+    const uniqueComponents = components.map((component) => {
+      const name = makeUnique(component.name, usedNames);
+      if (name !== component.name) renames.set(component.name, name);
+      return { name, node: component.node };
+    });
+    const mainName = makeUnique(
+      toComponentName(mainRoot.name || 'Component'),
+      usedNames,
+    );
+    const mainNode = renames.size ? renameRefs(mainRoot, renames) : mainRoot;
+
+    collectImports(mainNode, usage);
+    uniqueComponents.forEach((component) =>
+      collectImports(component.node, usage),
+    );
+
+    uniqueComponents.forEach((component) =>
+      fns.push(
+        renderFunction(component.name, component.node, renderOptions, false),
+      ),
+    );
+    fns.push(renderFunction(mainName, mainNode, renderOptions, true));
+  }
 
   const importLines: string[] = [];
   if (usage.rn.size > 0) {
@@ -158,18 +223,8 @@ export function generateRN(
     );
   }
 
-  const componentFns = components.map((component) =>
-    renderFunction(component.name, component.node, renderOptions, false),
-  );
-  const mainFn = renderFunction(
-    toComponentName(mainRoot.name || 'Component'),
-    mainRoot,
-    renderOptions,
-    true,
-  );
-
   return `${importLines.join('\n')}
 
-${[...componentFns, mainFn].join('\n\n')}
+${fns.join('\n\n')}
 `;
 }
