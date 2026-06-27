@@ -9,6 +9,14 @@ import { parseThemeColors } from './core/parse-theme';
 import { svgToJsx } from './core/svg-to-jsx';
 
 const COLOR_TOKENS_KEY = 'colorTokens';
+const API_KEY_KEY = 'anthropicApiKey';
+
+/** Payload sent to the UI after a successful conversion: the code plus the IR it
+ * was generated from, so the UI can run the optional LLM refinement on the same IR. */
+export interface GeneratedCode {
+  code: string;
+  ir: IRNode;
+}
 
 export interface ConvertHandler {
   name: 'CONVERT';
@@ -17,7 +25,7 @@ export interface ConvertHandler {
 
 export interface CodeGeneratedHandler {
   name: 'CODE_GENERATED';
-  handler: (code: string) => void;
+  handler: (payload: GeneratedCode) => void;
 }
 
 export interface ConversionErrorHandler {
@@ -28,6 +36,24 @@ export interface ConversionErrorHandler {
 export interface ImportThemeHandler {
   name: 'IMPORT_THEME';
   handler: (source: string) => void;
+}
+
+/** UI asks for the persisted config (currently just the Anthropic API key). */
+export interface GetConfigHandler {
+  name: 'GET_CONFIG';
+  handler: () => void;
+}
+
+/** Host returns the persisted config to the UI. */
+export interface ConfigHandler {
+  name: 'CONFIG';
+  handler: (config: { apiKey: string }) => void;
+}
+
+/** UI persists a new Anthropic API key into clientStorage. */
+export interface SetApiKeyHandler {
+  name: 'SET_API_KEY';
+  handler: (apiKey: string) => void;
 }
 
 /** Exports each vector node's SVG and converts it to react-native-svg JSX in place. */
@@ -54,10 +80,10 @@ async function injectSvg(node: IRNode): Promise<void> {
 async function nodeToCode(
   node: SceneNode,
   options?: Partial<GenOptions>,
-): Promise<string> {
+): Promise<GeneratedCode> {
   const ir = collapseVectors(extract(node));
   await injectSvg(ir);
-  return generateRN(ir, options);
+  return { ir, code: generateRN(ir, options) };
 }
 
 /** Maps the `snap` codegen preference to a px tolerance. */
@@ -113,6 +139,13 @@ async function convertSelection(): Promise<void> {
   emit<CodeGeneratedHandler>('CODE_GENERATED', await nodeToCode(selection[0]));
 }
 
+async function sendConfig(): Promise<void> {
+  const apiKey = await figma.clientStorage.getAsync(API_KEY_KEY);
+  emit<ConfigHandler>('CONFIG', {
+    apiKey: typeof apiKey === 'string' ? apiKey : '',
+  });
+}
+
 export default function main(): void {
   // Dev Mode code generator: register the generate callback and stay resident.
   // figma.showUI is not allowed inside the generate callback, so this branch
@@ -120,11 +153,12 @@ export default function main(): void {
   if (figma.mode === 'codegen') {
     figma.codegen.on('generate', async ({ node }): Promise<CodegenResult[]> => {
       const options = await codegenOptions();
+      const { code } = await nodeToCode(node, options);
       return [
         {
           title: 'React Native + NativeWind',
           language: 'TYPESCRIPT',
-          code: await nodeToCode(node, options),
+          code,
         },
       ];
     });
@@ -146,6 +180,12 @@ export default function main(): void {
   // Run plugin (design mode / Dev Mode run): show the preview + copy UI.
   on<ConvertHandler>('CONVERT', () => {
     void convertSelection();
+  });
+  on<GetConfigHandler>('GET_CONFIG', () => {
+    void sendConfig();
+  });
+  on<SetApiKeyHandler>('SET_API_KEY', (apiKey) => {
+    void figma.clientStorage.setAsync(API_KEY_KEY, apiKey);
   });
   showUI({ width: 420, height: 600 });
 }

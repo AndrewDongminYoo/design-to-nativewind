@@ -5,38 +5,54 @@ import {
   Muted,
   render,
   Text,
+  Textbox,
   VerticalSpace,
 } from '@create-figma-plugin/ui';
 import { emit, on } from '@create-figma-plugin/utilities';
 import { Fragment, h, type JSX } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
+import type { IRNode } from './core/ir';
+import { refineWithLLM } from './core/llm';
 import type {
   CodeGeneratedHandler,
+  ConfigHandler,
   ConversionErrorHandler,
   ConvertHandler,
+  GetConfigHandler,
   ImportThemeHandler,
+  SetApiKeyHandler,
 } from './main';
 
 function ConvertView() {
   const [code, setCode] = useState<string>('');
+  const [ir, setIr] = useState<IRNode | null>(null);
   const [error, setError] = useState<string>('');
+  const [apiKey, setApiKey] = useState<string>('');
+  const [refining, setRefining] = useState<boolean>(false);
 
   useEffect(() => {
-    const offCode = on<CodeGeneratedHandler>('CODE_GENERATED', (generated) => {
+    const offCode = on<CodeGeneratedHandler>('CODE_GENERATED', (payload) => {
       setError('');
-      setCode(generated);
+      setCode(payload.code);
+      setIr(payload.ir);
     });
     const offError = on<ConversionErrorHandler>(
       'CONVERSION_ERROR',
       (message) => {
         setCode('');
+        setIr(null);
         setError(message);
       },
     );
+    const offConfig = on<ConfigHandler>('CONFIG', (config) => {
+      setApiKey(config.apiKey);
+    });
+    emit<GetConfigHandler>('GET_CONFIG');
     return () => {
       offCode();
       offError();
+      offConfig();
     };
   }, []);
 
@@ -47,6 +63,26 @@ function ConvertView() {
   const handleCopy = useCallback(() => {
     if (code) void navigator.clipboard.writeText(code);
   }, [code]);
+
+  const handleApiKey = useCallback((value: string) => {
+    setApiKey(value);
+    emit<SetApiKeyHandler>('SET_API_KEY', value);
+  }, []);
+
+  const handleRefine = useCallback(async () => {
+    if (!ir || !apiKey || refining) return;
+    setRefining(true);
+    setError('');
+    try {
+      const refined = await refineWithLLM({ apiKey, ir, generatedCode: code });
+      setCode(refined);
+    } catch (e) {
+      // Keep the deterministic code; surface the failure in the error slot.
+      setError(e instanceof Error ? e.message : 'LLM refinement failed');
+    } finally {
+      setRefining(false);
+    }
+  }, [ir, apiKey, code, refining]);
 
   return (
     <Container space="medium">
@@ -61,6 +97,17 @@ function ConvertView() {
         Convert selection
       </Button>
       <VerticalSpace space="medium" />
+      <Text>
+        <Muted>Anthropic API key (optional, for LLM cleanup)</Muted>
+      </Text>
+      <VerticalSpace space="small" />
+      <Textbox
+        password
+        placeholder="sk-ant-…"
+        value={apiKey}
+        onValueInput={handleApiKey}
+      />
+      <VerticalSpace space="medium" />
       {error ? (
         <Text>
           <Muted>{error}</Muted>
@@ -71,6 +118,19 @@ function ConvertView() {
           <Button secondary fullWidth onClick={handleCopy}>
             Copy code
           </Button>
+          {apiKey ? (
+            <Fragment>
+              <VerticalSpace space="small" />
+              <Button
+                secondary
+                fullWidth
+                disabled={refining}
+                onClick={() => void handleRefine()}
+              >
+                {refining ? 'Refining…' : 'Refine with LLM'}
+              </Button>
+            </Fragment>
+          ) : null}
           <VerticalSpace space="small" />
           <textarea
             readOnly

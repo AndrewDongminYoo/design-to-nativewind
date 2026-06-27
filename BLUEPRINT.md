@@ -65,7 +65,7 @@ IR  ──▶ host injectSvg: figma.exportAsync per vector → svg-to-jsx.ts (pu
    │     ├─ map-styles.ts  (pure) — Figma props → NativeWind classes
    │     └─ extract-components.ts  (pure) — hoist repeated subtrees into sub-components
    ▼
-component code ──(optional, not yet wired)──▶ llm.ts (Claude refines naming/structure)
+component code ──(optional, run mode only)──▶ llm.ts (Claude refines naming/structure)
 ```
 
 The IR is pure types; everything except `extract.ts` is free of the Figma runtime. The one deliberate exception is vector SVG export, which needs `figma.exportAsync`, so the host (`main.ts`) walks the IR and exports each vector before the pure `svg-to-jsx` transform runs.
@@ -75,21 +75,21 @@ and swapping only `generate-*`.
 
 ## 5. Module Boundaries
 
-| File                             | Responsibility                                                         | Depends on  |
-| -------------------------------- | ---------------------------------------------------------------------- | ----------- |
-| `src/main.ts`                    | codegen + run modes, SVG export (`injectSvg`), postMessage             | figma       |
-| `src/ui.tsx`                     | code preview, copy, theme-import UI                                    | preact      |
-| `src/core/ir.ts`                 | IR type definitions                                                    | none (pure) |
-| `src/core/options.ts`            | `GenOptions` threaded from the runtime into the pure pipeline          | pure        |
-| `src/core/extract.ts`            | Figma node → IR                                                        | figma types |
-| `src/core/collapse-vectors.ts`   | fold pure-vector groups into a single `vector` node                    | pure        |
-| `src/core/svg-to-jsx.ts`         | exported SVG string → react-native-svg JSX ("SVGR-lite")               | pure        |
-| `src/core/map-styles.ts`         | IR style → NativeWind classes (scale snap vs arbitrary value)          | pure        |
-| `src/core/extract-components.ts` | hoist repeated subtrees into reusable sub-components                   | pure        |
-| `src/core/names.ts`              | sanitize layer names into safe component identifiers                   | pure        |
-| `src/core/parse-theme.ts`        | extract `hex → token` map from a Tailwind/CSS theme                    | pure        |
-| `src/core/generate-rn.ts`        | IR → RN + NativeWind JSX                                               | pure        |
-| `src/core/llm.ts`                | optional Claude refinement (not yet wired); API key in `clientStorage` | fetch       |
+| File                             | Responsibility                                                       | Depends on  |
+| -------------------------------- | -------------------------------------------------------------------- | ----------- |
+| `src/main.ts`                    | codegen + run modes, SVG export (`injectSvg`), postMessage           | figma       |
+| `src/ui.tsx`                     | code preview, copy, theme-import UI                                  | preact      |
+| `src/core/ir.ts`                 | IR type definitions                                                  | none (pure) |
+| `src/core/options.ts`            | `GenOptions` threaded from the runtime into the pure pipeline        | pure        |
+| `src/core/extract.ts`            | Figma node → IR                                                      | figma types |
+| `src/core/collapse-vectors.ts`   | fold pure-vector groups into a single `vector` node                  | pure        |
+| `src/core/svg-to-jsx.ts`         | exported SVG string → react-native-svg JSX ("SVGR-lite")             | pure        |
+| `src/core/map-styles.ts`         | IR style → NativeWind classes (scale snap vs arbitrary value)        | pure        |
+| `src/core/extract-components.ts` | hoist repeated subtrees into reusable sub-components                 | pure        |
+| `src/core/names.ts`              | sanitize layer names into safe component identifiers                 | pure        |
+| `src/core/parse-theme.ts`        | extract `hex → token` map from a Tailwind/CSS theme                  | pure        |
+| `src/core/generate-rn.ts`        | IR → RN + NativeWind JSX                                             | pure        |
+| `src/core/llm.ts`                | optional Claude refinement (run-mode UI); API key in `clientStorage` | fetch       |
 
 ## 6. Intermediate Representation (IR)
 
@@ -141,10 +141,12 @@ The snap-vs-arbitrary tolerance is configurable via the `snap` codegen preferenc
 
 Off by default. When enabled, the deterministic output plus the IR are sent to the Claude API
 to improve component naming and tidy structure — without changing the visual result.
-The API key is stored in `figma.clientStorage` (never committed).
+The API key is entered in the run-mode UI and stored in `figma.clientStorage` (never committed).
 Requires `networkAccess` for the Anthropic domain in `manifest.json`.
 
-Status: `llm.ts` (`refineWithLLM`) is written but **not yet wired** into `main.ts` / the UI.
+Available in the **run plugin** only, not in codegen mode: the `fetch` must run in the UI iframe,
+and the codegen `generate` callback executes in the sandbox with no network and no persistent UI.
+On any API/network error the UI falls back to the deterministic code and surfaces the error.
 Note that repeated-subtree extraction, originally scoped here, was instead implemented
 deterministically in `extract-components.ts`, so it no longer depends on the LLM pass.
 
@@ -169,7 +171,7 @@ Minimum verification command: `pnpm build && pnpm test`.
 1. M0 ✅ — Scaffold + IR types + empty pipeline that round-trips a trivial frame.
 2. M1 ✅ — Deterministic Auto Layout + spacing + color + text mapping (the MVP coverage above).
 3. M2 ✅ — UI polish: preview, copy, settings (snap tolerance); runs as a Dev Mode code generator.
-4. M3 ◐ — Optional LLM cleanup pass: `llm.ts` written but not yet wired into the UI.
+4. M3 ✅ — Optional LLM cleanup pass, wired into the run-mode UI (codegen mode stays deterministic).
 5. M4 (future) — Next.js + Tailwind renderer reusing the IR.
 
 Delivered beyond the original plan (deterministically, ahead of the LLM pass): vector →
