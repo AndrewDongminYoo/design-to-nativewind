@@ -5,9 +5,9 @@
 export interface GenOptions {
   /** snap tolerance in px (0 = exact, higher = snap more aggressively) */
   tolerance: number;
-  /** lowercased hex (#rrggbb) -> token name; reserved for theme import (feature B) */
+  /** lowercased hex (#rrggbb) -> token name; populated by importing a theme (parse-theme) */
   colorTokens: Record<string, string>;
-  /** hoist repeated subtrees into sub-components; reserved for style reuse (feature C) */
+  /** hoist repeated subtrees into sub-components; driven by the `reuse` codegen preference */
   extractComponents: boolean;
 }
 

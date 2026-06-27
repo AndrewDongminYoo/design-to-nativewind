@@ -10,23 +10,31 @@ See [BLUEPRINT.md](./BLUEPRINT.md) for the full product requirements and archite
 ## Architecture
 
 ```log
-Figma selection → extract.ts → IR → map-styles.ts → generate-rn.ts → RN + NativeWind code
-                                                                   └─(optional)→ llm.ts
+Figma selection → extract.ts → collapse-vectors.ts → generate-rn.ts → RN + NativeWind code
+                                  IR (+ host SVG export)  ├→ map-styles.ts
+                                                          ├→ extract-components.ts
+                                                          └─(optional)→ llm.ts
 ```
 
-The pure core modules (`map-styles`, `generate-rn`, IR helpers) carry the conversion logic and are unit-tested without a Figma runtime.
+Everything except `extract.ts` is free of the Figma runtime, so the conversion logic (`map-styles`, `generate-rn`, `collapse-vectors`, `svg-to-jsx`, `extract-components`, `parse-theme`) is unit-tested with plain IR fixtures.
+The one deliberate exception: vector SVG export needs the Figma runtime, so the host walks the IR and exports each vector before the pure `svg-to-jsx` transform runs.
+
+The plugin runs as a Dev Mode **code generator** (converts the selection on every change) and also as a classic run-plugin with a preview + copy UI.
 
 ## Development
 
+The package manager is **pnpm** (`pnpm install` applies the build patches in `patches/`).
+
 ```bash
-npm install
-npm run watch   # build the plugin in watch mode
-npm test        # run the unit tests
+pnpm install
+pnpm watch   # build the plugin in watch mode
+pnpm test    # run the unit tests
 ```
 
 Load the plugin in the Figma desktop app via Plugins → Development → Import plugin from manifest, pointing at the generated `manifest.json`.
 
 ## Status
 
-M0 scaffold: IR types, deterministic pipeline skeleton, and a working RN renderer for Auto Layout, spacing, color, and text.
-See the milestones section in [BLUEPRINT.md](./BLUEPRINT.md).
+Deterministic pipeline covering Auto Layout, spacing, color, and text (M1), with UI preview/copy and a spacing-snap setting (M2) and an optional LLM cleanup pass (M3).
+Also supports vector → react-native-svg conversion, hoisting repeated subtrees into sub-components, and color-token mapping from an imported Tailwind/CSS theme.
+A Next.js + Tailwind renderer reusing the IR (M4) is still planned. See the milestones section in [BLUEPRINT.md](./BLUEPRINT.md).
