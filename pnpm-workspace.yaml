@@ -1,2 +1,6 @@
 allowBuilds:
   esbuild: true
+overrides:
+  esbuild: ^0.28.1
+patchedDependencies:
+  '@create-figma-plugin/build@4.0.3': patches/@create-figma-plugin__build@4.0.3.patch
