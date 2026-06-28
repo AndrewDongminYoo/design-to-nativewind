@@ -26,7 +26,12 @@ function rnTag(node: IRNode): 'View' | 'Text' | 'Image' | 'ScrollView' {
 }
 
 function escapeText(content: string): string {
-  return content.replace(/[{}]/g, (c) => `{'${c}'}`);
+  // Escape JSX braces, and turn line breaks into `{'\n'}` — a raw newline in
+  // JSX text collapses to a space, so it must be an explicit expression to
+  // render. Figma stores line breaks as \n, \r\n, or \u2028 (LINE SEPARATOR).
+  return content.replace(/\r\n|[\r\n\u2028\u2029{}]/g, (c) =>
+    c === '{' || c === '}' ? `{'${c}'}` : "{'\\n'}",
+  );
 }
 
 /** Emits ` width={52}` for a fixed dimension, nothing for fill/hug. */

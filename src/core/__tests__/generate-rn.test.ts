@@ -118,6 +118,32 @@ describe('generateRN', () => {
     expect(code).toContain('>Hello</Text>');
   });
 
+  it("renders text line breaks as {'\\n'} so they actually break", () => {
+    const makeText = (content: string): IRNode => ({
+      type: 'text',
+      name: 'Body',
+      width: 'hug',
+      height: 'hug',
+      style: { ...baseStyle },
+      text: {
+        content,
+        typography: {
+          fontSize: 14,
+          fontWeight: 400,
+          lineHeight: null,
+          color: null,
+        },
+      },
+      children: [],
+    });
+    expect(generateRN(makeText('Line 1\nLine 2'))).toContain(
+      ">Line 1{'\\n'}Line 2</Text>",
+    );
+    // \r\n is one break; \u2028 is Figma's soft line break.
+    expect(generateRN(makeText('a\r\nb'))).toContain(">a{'\\n'}b</Text>");
+    expect(generateRN(makeText('x\u2028y'))).toContain(">x{'\\n'}y</Text>");
+  });
+
   it('honors the snap tolerance option (Loose vs Strict)', () => {
     const node = frame({
       layout: {
