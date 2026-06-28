@@ -32,6 +32,9 @@ export async function refineWithLLM({
       'content-type': 'application/json',
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
+      // The plugin UI is a browser iframe; the API blocks browser-origin calls
+      // via CORS unless this opt-in header is present.
+      'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
       model: MODEL,
@@ -55,5 +58,13 @@ export async function refineWithLLM({
   };
   const text = data.content.find((block) => block.type === 'text')?.text;
   if (!text) throw new Error('Anthropic API returned no text block');
-  return text.trim();
+  return stripCodeFence(text);
+}
+
+/** Removes a surrounding ```lang … ``` fence the model often wraps code in, so
+ * the textarea and "Copy code" get compilable source rather than markdown. */
+function stripCodeFence(text: string): string {
+  const trimmed = text.trim();
+  const fenced = /^```[^\n]*\n([\s\S]*?)\n?```$/.exec(trimmed);
+  return fenced ? fenced[1].trim() : trimmed;
 }
