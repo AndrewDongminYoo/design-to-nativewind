@@ -134,8 +134,11 @@ For numeric values (spacing, radius, font size), snap to the nearest Tailwind/Na
 when within a tolerance; otherwise emit an arbitrary value (`p-[13px]`).
 Colors emit arbitrary hex by default, or a named token (`bg-primary-500`) when the hex matches a
 `hex → token` pair imported from a Tailwind config / CSS theme (`parse-theme.ts`).
+Spacing works the same way: an imported `theme.spacing` token (`p-gutter`) wins on an exact px
+match, then the default scale (`p-6`), then arbitrary (`p-[13px]`).
 The snap-vs-arbitrary tolerance is configurable via the `snap` codegen preference
-(`strict` = 0px, `default` = 1px, `loose` = 2px).
+(`strict` = 0px, `default` = 1px, `loose` = 2px). Token maps apply in codegen mode only (they are
+populated by the `import` codegen action).
 
 ## 9. LLM-Assisted Mode (Optional)
 
@@ -180,6 +183,6 @@ mapping from an imported Tailwind/CSS theme.
 
 ## 13. Open Questions
 
-- Token mapping: ✅ resolved — colors map to imported theme tokens (`parse-theme.ts`); spacing still snaps to the Tailwind scale. Spacing-token mapping remains open.
+- Token mapping: ✅ resolved — both colors and spacing map to imported theme tokens (`parse-theme.ts`), falling back to the default scale then arbitrary values.
 - Multi-frame selection: ✅ resolved — the run plugin converts every top-level selected node into one file with one exported component per frame (`generateRNMulti`), names deduplicated file-wide. Hoisting stays per-frame (no cross-frame component sharing yet). Codegen mode remains single-node.
 - Component extraction heuristics for repeated subtrees: ✅ resolved — implemented deterministically in `extract-components.ts` (≥2 occurrences, ≥3 nodes) rather than via the LLM. Nested repeats inside an extracted component stay inline (conservative baseline) — tuning is open.

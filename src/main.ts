@@ -5,11 +5,19 @@ import { extract } from './core/extract';
 import { generateRN, generateRNMulti } from './core/generate-rn';
 import type { IRNode } from './core/ir';
 import { DEFAULT_OPTIONS, type GenOptions } from './core/options';
-import { parseThemeColors } from './core/parse-theme';
+import { parseThemeColors, parseThemeSpacing } from './core/parse-theme';
 import { svgToJsx } from './core/svg-to-jsx';
 
 const COLOR_TOKENS_KEY = 'colorTokens';
+const SPACING_TOKENS_KEY = 'spacingTokens';
 const API_KEY_KEY = 'anthropicApiKey';
+
+/** Coerces a clientStorage value into a string-keyed token map. */
+function asTokenMap(value: unknown): Record<string, string> {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, string>)
+    : {};
+}
 
 /** Payload sent to the UI after a successful conversion: the code plus the IR it
  * was generated from, so the UI can run the optional LLM refinement on the same IR. */
@@ -131,26 +139,30 @@ function snapTolerance(snap: string | undefined): number {
 
 async function codegenOptions(): Promise<GenOptions> {
   const colorTokens = await figma.clientStorage.getAsync(COLOR_TOKENS_KEY);
+  const spacingTokens = await figma.clientStorage.getAsync(SPACING_TOKENS_KEY);
   const { snap, reuse } = figma.codegen.preferences.customSettings;
   return {
     ...DEFAULT_OPTIONS,
     tolerance: snapTolerance(snap),
     extractComponents: reuse !== 'off',
-    colorTokens:
-      typeof colorTokens === 'object' && colorTokens !== null
-        ? (colorTokens as Record<string, string>)
-        : {},
+    colorTokens: asTokenMap(colorTokens),
+    spacingTokens: asTokenMap(spacingTokens),
   };
 }
 
 async function storeImportedTheme(source: string): Promise<void> {
   const colorTokens = parseThemeColors(source);
+  const spacingTokens = parseThemeSpacing(source);
   await figma.clientStorage.setAsync(COLOR_TOKENS_KEY, colorTokens);
-  const count = Object.keys(colorTokens).length;
+  await figma.clientStorage.setAsync(SPACING_TOKENS_KEY, spacingTokens);
+  const colorCount = Object.keys(colorTokens).length;
+  const spacingCount = Object.keys(spacingTokens).length;
   figma.notify(
-    count > 0
-      ? `Imported ${count} color token${count === 1 ? '' : 's'}`
-      : 'No color tokens found in the imported file',
+    colorCount + spacingCount > 0
+      ? `Imported ${colorCount} color + ${spacingCount} spacing token${
+          colorCount + spacingCount === 1 ? '' : 's'
+        }`
+      : 'No color or spacing tokens found in the imported file',
   );
   figma.ui.close();
   figma.codegen.refresh();

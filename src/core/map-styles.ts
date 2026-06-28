@@ -3,7 +3,9 @@
 import type { IRNode, Sizing } from './ir';
 import type { GenOptions } from './options';
 
-type MapOptions = Partial<Pick<GenOptions, 'tolerance' | 'colorTokens'>>;
+type MapOptions = Partial<
+  Pick<GenOptions, 'tolerance' | 'colorTokens' | 'spacingTokens'>
+>;
 
 /** Returns `bg-primary` when the hex maps to a token, else `bg-[#hex]`. */
 function colorClass(
@@ -51,12 +53,16 @@ export function snapSpacing(
   return best?.step ?? null;
 }
 
-/** Builds a spacing utility like `p-4` or `p-[13px]`. */
+/** Builds a spacing utility like `p-gutter`, `p-4`, or `p-[13px]`. An imported
+ * spacing token (exact px match) wins, then the default scale, then arbitrary. */
 export function spacingClass(
   prefix: string,
   px: number,
   tolerance = SNAP_TOLERANCE_PX,
+  spacingTokens: Record<string, string> = {},
 ): string {
+  const token = spacingTokens[String(Math.round(px))];
+  if (token) return `${prefix}-${token}`;
   if (px === 0) return `${prefix}-0`;
   const step = snapSpacing(px, tolerance);
   return step !== null
@@ -88,6 +94,9 @@ const ALIGN: Record<string, string> = {
 export function mapClasses(node: IRNode, options: MapOptions = {}): string[] {
   const tolerance = options.tolerance ?? SNAP_TOLERANCE_PX;
   const colorTokens = options.colorTokens ?? {};
+  const spacingTokens = options.spacingTokens ?? {};
+  const sp = (prefix: string, px: number): string =>
+    spacingClass(prefix, px, tolerance, spacingTokens);
   const classes: string[] = [];
 
   if (node.layout) {
@@ -95,23 +104,21 @@ export function mapClasses(node: IRNode, options: MapOptions = {}): string[] {
     classes.push('flex', direction === 'row' ? 'flex-row' : 'flex-col');
     classes.push(JUSTIFY[justify]);
     classes.push(ALIGN[align]);
-    if (gap > 0) classes.push(spacingClass('gap', gap, tolerance));
+    if (gap > 0) classes.push(sp('gap', gap));
 
     const { top, right, bottom, left } = padding;
     if (top === right && right === bottom && bottom === left) {
-      if (top > 0) classes.push(spacingClass('p', top, tolerance));
+      if (top > 0) classes.push(sp('p', top));
     } else {
-      if (top === bottom && top > 0)
-        classes.push(spacingClass('py', top, tolerance));
+      if (top === bottom && top > 0) classes.push(sp('py', top));
       else {
-        if (top > 0) classes.push(spacingClass('pt', top, tolerance));
-        if (bottom > 0) classes.push(spacingClass('pb', bottom, tolerance));
+        if (top > 0) classes.push(sp('pt', top));
+        if (bottom > 0) classes.push(sp('pb', bottom));
       }
-      if (left === right && left > 0)
-        classes.push(spacingClass('px', left, tolerance));
+      if (left === right && left > 0) classes.push(sp('px', left));
       else {
-        if (left > 0) classes.push(spacingClass('pl', left, tolerance));
-        if (right > 0) classes.push(spacingClass('pr', right, tolerance));
+        if (left > 0) classes.push(sp('pl', left));
+        if (right > 0) classes.push(sp('pr', right));
       }
     }
   }

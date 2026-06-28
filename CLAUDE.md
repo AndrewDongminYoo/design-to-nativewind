@@ -79,7 +79,7 @@ Why the IR exists: a future Next.js + Tailwind target reuses `extract` + the mid
 
 ### Style mapping convention (snap vs arbitrary)
 
-Numeric values (spacing, radius, font size) snap to the nearest Tailwind/NativeWind scale step when within tolerance, otherwise emit an arbitrary value like `p-[13px]`. The tolerance is data-driven: `SNAP_TOLERANCE_PX` (1px) is the default, but the live value is threaded through `GenOptions.tolerance` from the `snap` codegen preference (`strict` = 0, `default` = 1, `loose` = 2). See `snapSpacing`/`spacingClass` in [src/core/map-styles.ts](src/core/map-styles.ts). Colors emit arbitrary hex (`bg-[#RRGGBB]`) by default, but map to a token (`bg-primary-500`) when the hex is present in `colorTokens` — populated by importing a theme (`parse-theme.ts`).
+Numeric values (spacing, radius, font size) snap to the nearest Tailwind/NativeWind scale step when within tolerance, otherwise emit an arbitrary value like `p-[13px]`. The tolerance is data-driven: `SNAP_TOLERANCE_PX` (1px) is the default, but the live value is threaded through `GenOptions.tolerance` from the `snap` codegen preference (`strict` = 0, `default` = 1, `loose` = 2). See `snapSpacing`/`spacingClass` in [src/core/map-styles.ts](src/core/map-styles.ts). Colors emit arbitrary hex (`bg-[#RRGGBB]`) by default, but map to a token (`bg-primary-500`) when the hex is present in `colorTokens`. Spacing behaves the same way via `spacingTokens` (exact px match → `p-gutter`, else scale snap, else arbitrary). Both maps are populated by importing a theme (`parse-theme.ts` extracts `colors` and `spacing`) and apply in codegen mode only.
 
 ## Conventions & gotchas
 

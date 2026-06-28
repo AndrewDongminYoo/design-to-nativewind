@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseThemeColors } from '../parse-theme';
+import { parseThemeColors, parseThemeSpacing } from '../parse-theme';
 
 describe('parseThemeColors', () => {
   it('parses a flat Tailwind colors object', () => {
@@ -43,5 +43,31 @@ describe('parseThemeColors', () => {
   it('skips non-hex color values (named colors, functions)', () => {
     const source = `colors: { sky: 'cornflowerblue', dynamic: rgb(1,2,3), ok: '#abc' }`;
     expect(parseThemeColors(source)).toEqual({ '#aabbcc': 'ok' });
+  });
+});
+
+describe('parseThemeSpacing', () => {
+  it('parses px, rem, and bare-number spacing values into integer px', () => {
+    const source = `theme: { spacing: { gutter: '24px', section: '2rem', tight: 4 } }`;
+    expect(parseThemeSpacing(source)).toEqual({
+      '24': 'gutter', // px
+      '32': 'section', // 2rem → 32px
+      '4': 'tight', // bare number → px
+    });
+  });
+
+  it('merges theme.spacing and theme.extend.spacing blocks', () => {
+    const source = `module.exports = {
+      theme: {
+        spacing: { base: '8px' },
+        extend: { spacing: { hero: '64px' } },
+      },
+    }`;
+    expect(parseThemeSpacing(source)).toEqual({ '8': 'base', '64': 'hero' });
+  });
+
+  it('skips values it cannot snap on (auto, %, calc)', () => {
+    const source = `spacing: { a: 'auto', b: '50%', c: 'calc(100% - 1rem)', d: '12px' }`;
+    expect(parseThemeSpacing(source)).toEqual({ '12': 'd' });
   });
 });

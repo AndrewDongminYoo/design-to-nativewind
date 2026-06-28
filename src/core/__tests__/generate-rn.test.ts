@@ -68,6 +68,23 @@ describe('mapClasses', () => {
     // Falls back to an arbitrary value when the hex is not in the token map.
     expect(mapClasses(node)).toContain('bg-[#3b82f6]');
   });
+
+  it('maps spacing to a named token, else the scale, else arbitrary', () => {
+    const node = frame({
+      layout: {
+        direction: 'row',
+        justify: 'start',
+        align: 'start',
+        gap: 14,
+        padding: { top: 24, right: 24, bottom: 24, left: 24 },
+      },
+    });
+    const classes = mapClasses(node, { spacingTokens: { '24': 'gutter' } });
+    expect(classes).toContain('p-gutter'); // exact token match wins
+    expect(classes).toContain('gap-[14px]'); // 14px: no token, >1px from any step
+    // Without the token, 24px snaps to the default scale step (p-6).
+    expect(mapClasses(node)).toContain('p-6');
+  });
 });
 
 describe('generateRN', () => {

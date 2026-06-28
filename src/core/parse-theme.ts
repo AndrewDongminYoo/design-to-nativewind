@@ -1,9 +1,11 @@
-// Tolerant, eval-free extraction of color tokens from a user's Tailwind config
-// or CSS theme. Pure and unit-testable. Anything we cannot parse is skipped, so
-// callers degrade gracefully to arbitrary hex values.
+// Tolerant, eval-free extraction of color and spacing tokens from a user's
+// Tailwind config or CSS theme. Pure and unit-testable. Anything we cannot parse
+// is skipped, so callers degrade gracefully to arbitrary values.
 //
-// Returns a map of normalized hex (#rrggbb, lowercase) -> token name, e.g.
+// Colors: a map of normalized hex (#rrggbb, lowercase) -> token name, e.g.
 //   { "#3b82f6": "primary-500" }
+// Spacing: a map of integer px (as a string) -> token name, e.g.
+//   { "24": "gutter" }
 
 /** Normalizes a hex string to #rrggbb lowercase, or null if not a 3/6-digit hex. */
 function normalizeHex(raw: string): string | null {
@@ -120,4 +122,77 @@ function parseCssColorVars(source: string): Record<string, string> {
 /** Extracts a hex -> token-name map from a Tailwind config or CSS theme. */
 export function parseThemeColors(source: string): Record<string, string> {
   return { ...parseCssColorVars(source), ...parseTailwindColors(source) };
+}
+
+/** Normalizes a spacing value to integer px (rem/em → ×16, bare number → px), or
+ * null for values we don't snap on (`auto`, `%`, `calc(...)`, …). */
+function normalizeSpacingPx(raw: string): number | null {
+  const match = /^(-?\d*\.?\d+)(px|rem|em)?$/.exec(raw.trim());
+  if (match === null) {
+    return null;
+  }
+  const n = Number.parseFloat(match[1]);
+  if (!Number.isFinite(n)) {
+    return null;
+  }
+  const px = match[2] === 'rem' || match[2] === 'em' ? n * 16 : n;
+  return Math.round(px);
+}
+
+/** Walks a `spacing`-style object body, emitting px(string)->token entries. */
+function parseSpacingEntries(body: string, out: Record<string, string>): void {
+  let i = 0;
+  while (i < body.length) {
+    while (i < body.length && /[\s,]/.test(body[i])) {
+      i++;
+    }
+    if (i >= body.length) {
+      break;
+    }
+    const keyMatch = KEY_RE.exec(body.slice(i));
+    if (keyMatch === null) {
+      i++;
+      continue;
+    }
+    const key = keyMatch[1] ?? keyMatch[2] ?? keyMatch[3];
+    i += keyMatch[0].length;
+
+    // Spacing values are scalars; skip any nested object defensively.
+    if (body[i] === '{') {
+      const inner = matchBraces(body, i);
+      if (inner === null) {
+        break;
+      }
+      i += inner.length + 2;
+      continue;
+    }
+
+    const valueMatch = VALUE_RE.exec(body.slice(i));
+    if (valueMatch === null) {
+      i++;
+      continue;
+    }
+    const raw = valueMatch[1] ?? valueMatch[2] ?? valueMatch[3];
+    const px = normalizeSpacingPx(raw);
+    if (px !== null) {
+      out[String(px)] = key;
+    }
+    i += valueMatch[0].length;
+  }
+}
+
+/** Extracts an integer-px -> token-name map from a Tailwind `spacing` object
+ * (both `theme.spacing` and `theme.extend.spacing` blocks are merged). */
+export function parseThemeSpacing(source: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  const keyRe = /(?:^|[\s,{])spacing\s*[:=]\s*\{/g;
+  let match: RegExpExecArray | null;
+  while ((match = keyRe.exec(source)) !== null) {
+    const openIndex = match.index + match[0].length - 1;
+    const body = matchBraces(source, openIndex);
+    if (body !== null) {
+      parseSpacingEntries(body, out);
+    }
+  }
+  return out;
 }
