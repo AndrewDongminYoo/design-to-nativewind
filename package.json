@@ -45,7 +45,7 @@
       "figma",
       "dev"
     ],
-    "id": "figma-to-nativewind",
+    "id": "1653684573206075427",
     "name": "Figma to NativeWind",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",

@@ -1,7 +1,7 @@
 {
   "api": "1.0.0",
   "editorType": ["figma", "dev"],
-  "id": "figma-to-nativewind",
+  "id": "1653684573206075427",
   "name": "Figma to NativeWind",
   "main": "build/main.js",
   "ui": "build/ui.js",
