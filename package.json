@@ -3,8 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "description": "Figma plugin that converts a selected design subtree into React Native + NativeWind code.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewDongminYoo/figma-to-nativewind.git"
+  },
+  "author": "Dongmin, Yu <ydm2790@gmail.com> (https://github.com/AndrewDongminYoo)",
   "license": "MIT",
-  "author": "Andrew Dongmin Yoo",
+  "bugs": {
+    "url": "https://github.com/AndrewDongminYoo/figma-to-nativewind/issues"
+  },
+  "homepage": "https://github.com/AndrewDongminYoo/figma-to-nativewind#readme",
   "scripts": {
     "build": "build-figma-plugin --typecheck --minify",
     "watch": "build-figma-plugin --typecheck --watch",
