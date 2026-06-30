@@ -101,6 +101,7 @@
         "label": "Import theme (tailwind.config / global.css)…"
       }
     ],
+    "documentAccess": "dynamic-page",
     "networkAccess": {
       "allowedDomains": [
         "https://api.anthropic.com"
