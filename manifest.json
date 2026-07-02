@@ -2,7 +2,7 @@
   "api": "1.0.0",
   "editorType": ["figma", "dev"],
   "id": "1653684573206075427",
-  "name": "Figma to NativeWind",
+  "name": "Design to NativeWind",
   "main": "build/main.js",
   "ui": "build/ui.js",
   "capabilities": ["codegen"],

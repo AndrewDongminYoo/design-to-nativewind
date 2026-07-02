@@ -1,4 +1,4 @@
-# Figma to NativeWind
+# Design to NativeWind
 
 A Figma plugin that converts a selected design subtree into React Native + NativeWind component code.
 

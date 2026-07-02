@@ -1,4 +1,4 @@
-# figma-to-nativewind — Product Requirements / Blueprint
+# design-to-nativewind — Product Requirements / Blueprint
 
 Status: Draft v0.1
 Owner: Andrew (AndrewDongminYoo)
