@@ -1,9 +1,25 @@
 # Design to NativeWind
 
-A Figma plugin that converts a selected design subtree into React Native + NativeWind component code.
+[![Design to NativeWind converts Figma selections into React Native and NativeWind code](https://raw.githubusercontent.com/AndrewDongminYoo/design-to-nativewind/main/docs/assets/readme-hero.png)](https://rn-toolkits.donminzzi.kr/design-to-nativewind)
 
-Conversion is deterministic by default (rule-based mapping from Figma properties to NativeWind utility classes), with an optional LLM-assisted pass for naming and structure.
-The first-class target is React Native (Expo) + NativeWind; a Next.js + Tailwind renderer is a planned extension sharing the same intermediate representation.
+[![Figma Community](https://img.shields.io/badge/Figma_Community-install-f24e1e?style=flat-square&logo=figma&logoColor=white)](https://www.figma.com/community/plugin/1653684573206075427/design-to-nativewind) [![React Native](https://img.shields.io/badge/output-React_Native-0086aa?style=flat-square&logo=react&logoColor=white)](https://reactnative.dev/) [![NativeWind](https://img.shields.io/badge/styles-NativeWind-38bdf8?style=flat-square)](https://www.nativewind.dev/) [![license](https://img.shields.io/github/license/AndrewDongminYoo/design-to-nativewind?style=flat-square&color=667085)](LICENSE) [![RN Toolkits](https://img.shields.io/badge/docs-RN_Toolkits-c57417?style=flat-square)](https://rn-toolkits.donminzzi.kr/design-to-nativewind)
+
+**Turn a Figma selection into React Native + NativeWind component code.**
+
+[Install from Figma Community](https://www.figma.com/community/plugin/1653684573206075427/design-to-nativewind) · [Documentation](https://rn-toolkits.donminzzi.kr/design-to-nativewind) · [Issues](https://github.com/AndrewDongminYoo/design-to-nativewind/issues)
+
+Design to NativeWind converts the selected Figma subtree through a deterministic, rule-based pipeline and returns component code ready to inspect and copy.
+
+## What it converts
+
+- Auto Layout, spacing, color, and text properties into NativeWind utility classes
+- Vector nodes into `react-native-svg` components
+- Repeated subtrees into reusable child components
+- Imported Tailwind or CSS colors into project tokens
+- Optional LLM-assisted naming and structure cleanup after deterministic generation
+
+The first-class target is React Native with Expo and NativeWind.
+A Next.js + Tailwind renderer is a planned extension sharing the same intermediate representation.
 
 See [BLUEPRINT.md](./BLUEPRINT.md) for the full product requirements and architecture.
 
@@ -23,7 +39,9 @@ The plugin runs as a Dev Mode **code generator** (converts the selection on ever
 
 ## Development
 
-The package manager is **pnpm** (`pnpm install` applies the build patches in `patches/`).
+Install the published plugin from [Figma Community](https://www.figma.com/community/plugin/1653684573206075427/design-to-nativewind).
+
+For local development, use **pnpm** (`pnpm install` applies the build patches in `patches/`).
 
 ```bash
 pnpm install
