@@ -16,13 +16,13 @@ importers:
     dependencies:
       '@create-figma-plugin/ui':
         specifier: ^4.0.3
-        version: 4.0.3(preact@10.29.7)
+        version: 4.0.3(preact@11.0.1)
       '@create-figma-plugin/utilities':
         specifier: ^4.0.3
         version: 4.0.3
       preact:
-        specifier: ^10.29.7
-        version: 10.29.7
+        specifier: ^11.0.1
+        version: 11.0.1
     devDependencies:
       '@create-figma-plugin/build':
         specifier: 4.0.3
@@ -1505,10 +1505,10 @@ packages:
     resolution: {integrity: sha512-DTPx3RWSSnWyzLxQnlH0rJP+EW5ekl16ZU4/psbIhA0e53kJfdgaN5vKM+xP7yJtXVu+nfdVFmlgFDEKAe4Pyw==}
     engines: {node: ^10 || ^12 || >=14}
 
-  preact@10.29.7:
-    resolution: {integrity: sha512-DCHYrK/B10yUD3ZjLfhZ3WIE/9Vf9VFUODcRE2dRomTYDpJk6z6L9wecSfhfE6M9ZTHUdyQkoC46arIDhEV84Q==}
+  preact@11.0.1:
+    resolution: {integrity: sha512-TNNwEq++jYNHy747LziCjPRVgEwnLSOIOAw/oYcjI3Tdnubx2EXtt76I0an8PATvUWtx/DX1kFIg1eFN+O/fkw==}
     peerDependencies:
-      preact-render-to-string: '>=5'
+      preact-render-to-string: '>=6.7.0'
     peerDependenciesMeta:
       preact-render-to-string:
         optional: true
@@ -1890,10 +1890,10 @@ snapshots:
 
   '@create-figma-plugin/tsconfig@4.0.3': {}
 
-  '@create-figma-plugin/ui@4.0.3(preact@10.29.7)':
+  '@create-figma-plugin/ui@4.0.3(preact@11.0.1)':
     dependencies:
       '@create-figma-plugin/utilities': 4.0.3
-      preact: 10.29.7
+      preact: 11.0.1
 
   '@create-figma-plugin/utilities@4.0.3':
     dependencies:
@@ -3203,7 +3203,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  preact@10.29.7: {}
+  preact@11.0.1: {}
 
   prelude-ls@1.2.1: {}
 
