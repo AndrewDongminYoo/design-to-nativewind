@@ -20,6 +20,9 @@ updates:
           - '*'
   - package-ecosystem: npm
     directory: /
+    # Rebuild the version-specific patch when updating this package.
+    ignore:
+      - dependency-name: '@create-figma-plugin/build'
     schedule:
       interval: weekly
       day: monday
