@@ -23,7 +23,7 @@ updates:
       - dependency-name: '@create-figma-plugin/build'
       # Runtime majors without a security fix stay off (operator, 2026-10-24); preact 11.0.1 came as #6.
       # update-types limits this to version updates; security updates still open.
-      - dependency-name: 'preact'
+      - dependency-name: preact
         update-types:
           - version-update:semver-major
     schedule:
