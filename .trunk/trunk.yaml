@@ -20,7 +20,7 @@ lint:
     - grype
   enabled:
     - actionlint@1.7.12
-    - checkov@3.3.30
+    - checkov@3.4.0
     - eslint@10.13.0
     - git-diff-check
     - markdownlint@0.50.0
