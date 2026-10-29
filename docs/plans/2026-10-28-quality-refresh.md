@@ -18,7 +18,7 @@
 6. Verify the effective Trunk configuration → inspect `trunk config print`, including Pinact commands, runtime versions, security lockfile coverage, and offline TruffleHog flags.
 7. Run the full gate → verify `trunk check --all --no-fix --jobs=2` and inspect its actual linter execution and findings.
 8. Reconcile knowledge → verify changed documented commands, paths, version sources, and internal links against current files.
-9. Verify the local filesystem reader → run its ten CLI tests and actual configured encoded/literal failures plus clean success.
+9. Verify the local filesystem reader → run its thirteen CLI tests and actual configured encoded/literal failures plus clean success.
 
 Use a deliberate failing input before trusting ad hoc metadata and watcher checks.
 Run formatters only with explicit file paths and review the proposed changes before applying them.
@@ -40,3 +40,10 @@ Do not use the synthetic check as evidence of real Figma, UI rendering or model 
 - `pnpm lint`
 - `pnpm typecheck`
 - `trunk check --all --no-fix --jobs=2`
+
+## Source-Line Repair
+
+The current reader uses the independently reviewed `localizations` repair at `b47e59659a886ad673a2f4a9bed6a3bf4986615b`.
+It prefers a positive integer filesystem line only when the literal starts on that line.
+Invalid hints retain literal-search and file-level fallbacks.
+Thirteen CLI tests cover repeated and out-of-order findings in addition to the existing lossless conversion cases.
