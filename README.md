@@ -41,7 +41,8 @@ The plugin runs as a Dev Mode **code generator** (converts the selection on ever
 
 Install the published plugin from [Figma Community](https://www.figma.com/community/plugin/1653684573206075427/design-to-nativewind).
 
-For local development, use **pnpm** (`pnpm install` applies the build patches in `patches/`).
+For local development, use the Node.js version in [`.nvmrc`](.nvmrc) and the **pnpm** version in [package.json](package.json).
+`pnpm install` applies the build patches in `patches/`.
 
 ```bash
 pnpm install
