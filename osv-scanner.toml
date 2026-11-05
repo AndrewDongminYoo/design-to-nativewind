@@ -1,0 +1,10 @@
+# osv-scanner suppressions. Every entry names the GHSA, the affected version, why no fix
+# exists today, when it was approved, and what event triggers re-evaluation.
+
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+reason = "glob@10.5.0 via typed-css-modules@0.9.1 -> @create-figma-plugin/build@4.0.3 has no compatible patch as of 2026-11-05: the advisory covers >= 9.0.0, <= 14.0.1, the fix is glob 14.0.2, and typed-css-modules 0.9.1, its latest release, still requires glob@^10.3.10 (glob 10.5.0 is the last 10.x release). Medium severity, AbortSignal cancellation bypass that allows filesystem traversal after a timeout. No first-party source imports glob; every path in the lockfile ends at a devDependency (the Figma plugin build tooling), so it is not part of the shipped plugin code. Approved on 2026-11-05. Re-evaluate when typed-css-modules or @create-figma-plugin/build accepts glob 14."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+reason = "minimatch@10.2.6 via eslint@10.13.0, @eslint/config-array@0.23.5 and @typescript-eslint/typescript-estree@8.72.1, and minimatch@9.0.9 via glob@10.5.0 -> typed-css-modules@0.9.1 -> @create-figma-plugin/build@4.0.3, have no compatible patch as of 2026-11-05: the advisory covers >= 7.0.0, < 11.0.1, the fix is minimatch 11.0.1, and the newest releases of those parents (eslint 10.14.0, @eslint/config-array 0.23.5, @typescript-eslint/typescript-estree 8.72.1, typed-css-modules 0.9.1) still require minimatch ^10 or, through glob 10, ^9. Medium severity, DoS through globparts amplification. No first-party source imports minimatch; every path in the lockfile ends at a devDependency (lint and Figma plugin build tooling), so it is not part of the shipped plugin code. Approved on 2026-11-05. Re-evaluate when eslint, @eslint/config-array, @typescript-eslint/typescript-estree or typed-css-modules accepts minimatch 11."
