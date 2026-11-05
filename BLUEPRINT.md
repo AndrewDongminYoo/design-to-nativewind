@@ -1,7 +1,7 @@
 # design-to-nativewind — Product Requirements / Blueprint
 
 Status: Draft v0.1
-Owner: Andrew (AndrewDongminYoo)
+Owner: me
 Last updated: 2026-06-28
 
 ## 1. Summary
