@@ -9,7 +9,7 @@ import {
   VerticalSpace,
 } from '@create-figma-plugin/ui';
 import { emit, on } from '@create-figma-plugin/utilities';
-import { Fragment, h, type JSX } from 'preact';
+import { Fragment, h, type TargetedEvent } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
 import type { IRNode } from './core/ir';
@@ -151,18 +151,15 @@ function ConvertView() {
 }
 
 function ImportView() {
-  const handleFile = useCallback(
-    (event: JSX.TargetedEvent<HTMLInputElement>) => {
-      const file = event.currentTarget.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        emit<ImportThemeHandler>('IMPORT_THEME', String(reader.result));
-      };
-      reader.readAsText(file);
-    },
-    [],
-  );
+  const handleFile = useCallback((event: TargetedEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      emit<ImportThemeHandler>('IMPORT_THEME', String(reader.result));
+    };
+    reader.readAsText(file);
+  }, []);
 
   return (
     <Container space="medium">
