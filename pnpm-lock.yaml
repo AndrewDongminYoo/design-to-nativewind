@@ -190,7 +190,7 @@ importers:
     devDependencies:
       '@create-figma-plugin/build':
         specifier: 4.0.3
-        version: 4.0.3(patch_hash=ef2254e40c8714153f2929b895c8e7367edfc934e1e8d2054cc1a1665f051074)(@figma/plugin-typings@1.142.0)(typescript@6.0.3)
+        version: 4.0.3(patch_hash=ef2254e40c8714153f2929b895c8e7367edfc934e1e8d2054cc1a1665f051074)(@figma/plugin-typings@1.143.0)(typescript@6.0.3)
       '@create-figma-plugin/tsconfig':
         specifier: ^4.0.3
         version: 4.0.3
@@ -201,8 +201,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.15.0(supports-color@7.2.0))
       '@figma/plugin-typings':
-        specifier: ^1.142.0
-        version: 1.142.0
+        specifier: ^1.143.0
+        version: 1.143.0
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.73.0
         version: 8.73.0(@typescript-eslint/parser@8.73.0(eslint@10.15.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.15.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
@@ -222,8 +222,8 @@ importers:
         specifier: ^8.3.8
         version: 8.3.8
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(vite@8.3.8)
+        specifier: ^5.1.1
+        version: 5.1.1(vite@8.3.8)
 
 packages:
 
@@ -463,8 +463,8 @@ packages:
     resolution: {integrity: sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@figma/plugin-typings@1.142.0':
-    resolution: {integrity: sha512-Loa9P4bUZi/pQejic8OYQSU4Zz9izJdIiDUkkKddq5Bfc5JPRV6pCeg3C8owovbX9lKshaFym86PlMhKZgLeBw==}
+  '@figma/plugin-typings@1.143.0':
+    resolution: {integrity: sha512-7oP0XwTiuAuQPRNmuPX4PeRP5fjLMnRZ6Ed7Ybr61JoW9Os04Eml/XqYE3kyvohcFQfYXsRK5sqCLaKzc8qnZg==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -735,8 +735,8 @@ packages:
     resolution: {integrity: sha512-k4lsFVpRZICbltkIEEH4hZRkwXkqDF1GHBpClKQOHQY+RkoZAAuyc1ci3I6p+CB6v3U4jaHIUshc4RzzQXZWLg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vitest/mocker@5.1.0':
-    resolution: {integrity: sha512-5umB9/jlWcqVS6fsrFmv5Gdnpu6wAUio/lEOwAmvB7v+lFo/IW2B9FhAD0p19GCULTgMzLCdUmuCDCnAzWgppQ==}
+  '@vitest/mocker@5.1.1':
+    resolution: {integrity: sha512-b2OgTB4+3ImWIVafXKazJXwLKwQxUNnix6b3xUvUTMh7RyXlrtzoxfZr8aEz9zkHOMAS4K5lu3TvFWoiVeVTQg==}
     peerDependencies:
       msw: ^2.4.9 || ^3.0.0
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -746,8 +746,8 @@ packages:
       vite:
         optional: true
 
-  '@vitest/spy@5.1.0':
-    resolution: {integrity: sha512-2DPO5OMHWKrBngC+fCmTQqemNF0gidRhp3lxbBmRhW+M1XJrfgPpqNqWVevXtn2f2ufD5ZaR1B6B641aAlcX5A==}
+  '@vitest/spy@5.1.1':
+    resolution: {integrity: sha512-6K8C6alQG1/Yc8/ZI22iJS7JEsxPdVzqtqDq+/xM4Z0mGVykemMVjLhqMy/q6/IHYG3kKD8hKSwRen/ZdyI9vQ==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -1942,20 +1942,20 @@ packages:
       yaml:
         optional: true
 
-  vitest@5.1.0:
-    resolution: {integrity: sha512-MzmNFnrwa8v8lF1bLxw3UJ4EREwVOVb75VqJZmUDRjJ6EluK/x9th7qTbaeDk41WxE1GxWqmTXcdsfobfH5sOA==}
+  vitest@5.1.1:
+    resolution: {integrity: sha512-trVmzUFOSraCZcI3uZIMD5FqBh4atFkC/XuJP/IU7qtyQay0FCs3Ia+0QiQ2JJwGyWG/xrcBoJNel2+O7kEZ0g==}
     engines: {node: ^22.12.0 || ^24.0.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@opentelemetry/api': ^1.9.0
       '@types/node': ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 5.1.0
-      '@vitest/browser-preview': 5.1.0
+      '@vitest/browser-playwright': 5.1.1
+      '@vitest/browser-preview': 5.1.1
       '@vitest/browser-webdriverio': ^5.0.0-beta.5 || >=5.0.0
-      '@vitest/coverage-istanbul': 5.1.0
-      '@vitest/coverage-v8': 5.1.0
-      '@vitest/ui': 5.1.0
+      '@vitest/coverage-istanbul': 5.1.1
+      '@vitest/coverage-v8': 5.1.1
+      '@vitest/ui': 5.1.1
       happy-dom: '*'
       jsdom: '*'
       vite: ^6.4.0 || ^7.0.0 || ^8.0.0
@@ -2041,10 +2041,10 @@ snapshots:
 
   '@colordx/core@5.8.0': {}
 
-  '@create-figma-plugin/build@4.0.3(patch_hash=ef2254e40c8714153f2929b895c8e7367edfc934e1e8d2054cc1a1665f051074)(@figma/plugin-typings@1.142.0)(typescript@6.0.3)':
+  '@create-figma-plugin/build@4.0.3(patch_hash=ef2254e40c8714153f2929b895c8e7367edfc934e1e8d2054cc1a1665f051074)(@figma/plugin-typings@1.143.0)(typescript@6.0.3)':
     dependencies:
       '@create-figma-plugin/common': 4.0.3
-      '@figma/plugin-typings': 1.142.0
+      '@figma/plugin-typings': 1.143.0
       chokidar: 4.0.3
       cssnano: 7.1.9(postcss@8.5.33)
       esbuild: 0.25.1
@@ -2220,7 +2220,7 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@figma/plugin-typings@1.142.0': {}
+  '@figma/plugin-typings@1.143.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -2468,16 +2468,16 @@ snapshots:
       '@typescript-eslint/types': 8.73.0
       eslint-visitor-keys: 5.0.1
 
-  '@vitest/mocker@5.1.0(vite@8.3.8)':
+  '@vitest/mocker@5.1.1(vite@8.3.8)':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@vitest/spy': 5.1.0
+      '@vitest/spy': 5.1.1
       estree-walker: 3.0.3
       magic-string: 1.4.5
     optionalDependencies:
       vite: 8.3.8
 
-  '@vitest/spy@5.1.0': {}
+  '@vitest/spy@5.1.1': {}
 
   acorn-jsx@5.3.2(acorn@8.19.0):
     dependencies:
@@ -3593,10 +3593,10 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  vitest@5.1.0(vite@8.3.8):
+  vitest@5.1.1(vite@8.3.8):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.1.0(vite@8.3.8)
+      '@vitest/mocker': 5.1.1(vite@8.3.8)
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
